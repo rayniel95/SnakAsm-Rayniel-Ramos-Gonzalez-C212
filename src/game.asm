@@ -2,6 +2,7 @@
 %include "keyboard.mac"
 section .data
     tablero times 1920 db 0
+    page db 1
 
 section .text
 
@@ -11,6 +12,7 @@ extern calibrate
 extern showMenu
 extern drawTablero
 extern drawText
+extern putChar
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -73,10 +75,24 @@ get_input:
     ; The value of the input is on 'word [esp]'
 
     ; Your bindings here
-    ; bind KEY.UP, draw.green
-    ; bind KEY.DOWN, draw.red
-     bind KEY.DOWN, showMenu
-     bind KEY.DOWN.UP, showMenu
+    cmp dword [page], 1
+    jne page2
+    mov eax, 0
+    bind KEY.DOWN, showMenu
+    bind KEY.DOWN.UP, showMenu
+    bind KEY.UP.UP, showMenu
+    bind KEY.UP, showMenu
+    bind KEY.ENTER, showMenu
+    cmp eax, 0
+    je continuePage1
+    push dword 15
+    push dword 0
+    push dword eax
+    push dword 0
+    push dword 'd'
+    call putChar
+    continuePage1:
+    page2:
     add esp, 2 ; free the stack
     ret
 

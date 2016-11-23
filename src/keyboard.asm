@@ -166,7 +166,7 @@ showMenu:
     call menu
         
     cmp byte [key], KEY.ENTER
-    je endWhile1
+    je true1
     cmp [key], byte KEY.DOWN.UP
     jne Continue1
     cmp [lastKey], byte KEY.DOWN
@@ -201,26 +201,34 @@ showMenu:
     push dword 15
     push dword 0
     push dword 29
-    push ebx
+    push dword [cursor]
     push dword ' '
     call putChar
+    mov ebx, [cursor]
     dec ebx
     cmp ebx, 16
     jne Continue3
     mov ebx, 21
     Continue3:
+    mov [cursor], ebx
     push dword 15
     push dword 0
     push dword 29
-    push ebx
+    push dword [cursor]
     push dword '*'
     call putChar
     continueWhile1:
     mov cl, [key]
     mov [lastKey], cl
+    jmp false1
     
-    endWhile1:
-            
+    true1:
+    mov eax, [cursor]
+    sub eax, 16
+    jmp end1
+    false1:
+    mov eax, 0
+    end1:
     pop ebp
     pop ebx
     pop ecx
