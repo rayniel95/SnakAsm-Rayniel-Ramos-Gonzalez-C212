@@ -1,11 +1,16 @@
 %include "video.mac"
 %include "keyboard.mac"
+section .data
+    tablero times 1920 db 0
 
 section .text
 
 extern clear, putc
 extern scan
 extern calibrate
+extern showMenu
+extern drawTablero
+extern drawText
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -33,11 +38,13 @@ game:
 
   ; Snakasm main loop
   game.loop:
-    .input:
+    .input:; ten presente guardar las flags en las subrutinas
       call get_input
 
     ; Main loop.
-
+   
+ 
+  
     ; Here is where you will place your game logic.
     ; Develop procedures like paint_map and update_content,
     ; declare it extern and use here.
@@ -60,15 +67,112 @@ draw.green:
 
   ret
 
-
 get_input:
     call scan
     push ax
     ; The value of the input is on 'word [esp]'
 
     ; Your bindings here
-    bind KEY.UP, draw.green
-    bind KEY.DOWN, draw.red
-
+    ; bind KEY.UP, draw.green
+    ; bind KEY.DOWN, draw.red
+     bind KEY.DOWN, showMenu
+     bind KEY.DOWN.UP, showMenu
     add esp, 2 ; free the stack
     ret
+
+; void putValue(dword tablero, dword value, dword fila, dword columna)
+; pone el valor correspondiente en la fila, columna de la matriz apuntada por tablero
+putValue:
+    push eax
+    push esi
+    push edx
+    push ebp
+    
+    mov ebp, esp
+    
+    mov esi,[ebp+20]
+    mov eax, [ebp+28]
+    mov edx, 80
+    mul edx
+    add eax, [ebp+32]
+    add esi, eax
+    mov al, [ebp+24]
+    mov [esi], al
+    
+    pop ebp
+    pop edx
+    pop esi
+    pop eax
+ret 16 
+; void putHorizontalLine(dword tablero, dword valor, dword cantidad, dword fila, dword columna)
+; realiza una fila horizontal en la matriz apuntada por tablero, poniendo el valor el la fila, columna 
+; correspondiente y la cantidad de veces indicadas hacia la derecha
+putHorizontalLine:
+    push ebx
+    push ecx
+    push ebp
+    
+    mov ebp, esp
+    
+    mov ecx, [ebp+24]
+    
+    Ciclo6:
+        mov ebx, [ebp+32]
+        add ebx, ecx
+        dec ebx
+        
+        push ebx
+        push dword [ebp+28]
+        push dword [ebp+20]
+        push dword [ebp+16]
+        call putValue
+    loop Ciclo6
+    
+    pop ebp
+    pop ecx
+    pop ebx
+ret 20
+; void putVerticalLine(dword tablero, dword valor, dword cantidad, dword fila, dword columna)
+; realiza una fila vartical en la matriz apuntada por tablero, poniendo el valor el la fila, columna 
+; correspondiente y la cantidad de veces indicadas hacia arriba
+putVerticalLine:
+    push ebx
+    push ecx
+    push ebp
+    
+    mov ebp, esp
+    
+    mov ecx, [ebp+24]
+
+    
+    Ciclo7:
+        mov ebx, [ebp+28]
+        sub ebx, ecx
+        inc ebx
+        push dword [ebp+32]
+        push ebx
+        push dword [ebp+20]
+        push dword [ebp+16]
+        call putValue
+    loop Ciclo7
+    
+    pop ebp
+    pop ecx
+    pop ebx
+ret 20
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        
