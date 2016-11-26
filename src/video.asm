@@ -733,7 +733,19 @@ drawTablero:
         jmp continueWhile2
         Continue6:
         cmp byte [esi], 0
-        je continueWhile2
+        jne continue7
+        push dword 15
+        push dword 0
+        push ecx        
+        
+        mov edx, ebx
+        inc edx
+        
+        push edx 
+        push dword ' '
+        call putChar
+        jmp continueWhile2
+        continue7:
         push dword 15
         push dword 0
         push ecx        
@@ -747,12 +759,12 @@ drawTablero:
         continueWhile2:
         inc ecx
         cmp ecx, 80
-        jne Continue7
+        jne Continue8
         inc ebx
         cmp ebx, 24
         je endWhile2
         mov ecx, 0
-        Continue7:
+        Continue8:
     jmp while2
     endWhile2:
     
@@ -762,8 +774,9 @@ drawTablero:
     popfd
     pop ecx
     pop edx
-ret 4; aca habia un 8 no se por que, deberia ser 4
-    
+ret 4
+
+; void Antartida(dword tablero)
 global Antartida
 Antartida:
     push ebp
@@ -873,10 +886,27 @@ Antartida:
     push dword [ebp+8]
     call putHorizontalLine
     
+    push dword 40
+    push dword 16
+    push dword 1
+    push dword [ebp+8]
+    call putValue
+    
+    push dword 40
+    push dword 9
+    push dword 254
+    push dword [ebp+8]
+    call putValue   
+    
+    push dword 75
+    push dword 15
+    push dword 254
+    push dword [ebp+8]
+    call putValue 
     
     
     pop ebp
-ret
+ret 4
     
     
     

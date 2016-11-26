@@ -39,15 +39,17 @@ game:
 
   ; Calibrate the timing
   call calibrate
-
+    push dword tablero
+    call Antartida
   ; Snakasm main loop
   game.loop:
     .input:
       call get_input
 
     ; Main loop
-
-       
+    push dword tablero
+    call drawTablero
+ 
     
     ; Here is where you will place your game logic.
     ; Develop procedures like paint_map and update_content,
@@ -90,6 +92,10 @@ get_input:
     ; aca se actualiza la pagina y se hacen otros llamados en dependencia del valor de retorno del menu
     continuePage1:
     page2:
+    bind KEY.UP, wrapMovUp
+    bind KEY.DOWN, wrapMovDown
+    bind KEY.LEFT, wrapMovLeft
+    bind KEY.RIGHT, wrapMovRight
     add esp, 2 ; free the stack
     ret
 
@@ -334,7 +340,7 @@ reduction:
     
 ret 4
 
-; (fila(al), columna(ah)) maxUValue(dword tablero, dword maxFila, dword maxColumna)
+; (fila(al), columna(ah)) maxUValue(dword tablero)
 global maxUValue
 maxUValue:
     push ecx
@@ -344,23 +350,18 @@ maxUValue:
     pushfd
     push dword 0
     push dword 0
-    push dword 0
     push ebp
     mov ebp, esp
     
-    mov eax, [ebp+48]
-    mov edx, [ebp+44]
-    mul edx
-    mov dword [ebp+4], eax
     xor eax, eax
     xor edx, edx
     xor ecx, ecx
     
-    mov esi, [ebp+40]
+    mov esi, [ebp+36]
     mov bl, 0
     
     while4:
-        mov esi, [ebp+40]
+        mov esi, [ebp+36]
         add esi, ecx
         cmp byte [esi], 0
         je continueWhile4
@@ -369,26 +370,25 @@ maxUValue:
         cmp byte [esi], bl
         jbe continueWhile4
         mov bl,[esi]
-        mov dword [ebp+12], edx
-        mov dword [ebp+8], eax
+        mov dword [ebp+8], edx
+        mov dword [ebp+4], eax
         continueWhile4:
             inc ecx
-            cmp ecx, [ebp+4]
+            cmp ecx, 1920
             je endWhile4
             inc edx
-            cmp edx, [ebp+48]
+            cmp edx, 80
             jne continue12
             xor edx, edx
             inc eax
-            cmp eax, [ebp+44]
+            cmp eax, 24
             je endWhile4
             continue12:
             jmp while4
     endWhile4:
-        mov al, [ebp+8]
-        mov ah, [ebp+12]
+        mov al, [ebp+4]
+        mov ah, [ebp+8]
     pop ebp
-    pop ecx
     pop ecx
     pop ecx
     popfd
@@ -397,14 +397,301 @@ maxUValue:
     pop ebx
     pop ecx
         
-ret 12
+ret 4
     
+; bool movSnake(dword tablero, dword valor, dword fila, dword columna)
+global movSnake
+movSnake:
+    push esi
+    push edx
+    pushfd
+    push ebp
+    mov ebp, esp
+    
+    mov esi, [ebp+20]
+    mov eax, [ebp+28]
+    mov edx, 80
+    mul edx
+    mov edx, [ebp+32]
+    add eax, edx
+    xor edx, edx
+    add esi, eax
+    
+    cmp byte [esi], 254
+    jne verCeldaLibre
+    mov dl, [ebp+24]
+    inc dl
+    mov byte [esi], dl
+    jmp true
+    verCeldaLibre:
+    cmp byte [esi], 0
+    jne false
+    mov dl, [ebp+24]
+    inc dl
+    mov [esi], dl
+    
+    push dword [ebp+20]
+    call reduction
+    true:
+    mov eax, 1
+    jmp final
+    false:
+    xor eax, eax
+    final:
+    pop ebp
+    popfd
+    pop edx
+    pop esi
+    
+ret 16
+; bool movUp(dword tablero)
+global movUp
+movUp:
+    pushfd
+    push ecx
+    push ebx
+    push edx
+    push esi
+    push ebp
+    mov ebp, esp
+    
+    push dword [ebp+28]
+    call maxUValue
+    
+    cmp eax, 0
+    je final5
+    
+    xor ebx, ebx
+    xor ecx, ecx
+    
+    mov bl, al
+    mov cl, ah
+    mov esi, [ebp+28]
+    mov eax, 80
+    mul ebx
+    add eax, ecx
+    add esi, eax
+    xor eax, eax
+    mov al, [esi]
+    dec ebx
+    
+    push ecx
+    push ebx
+    push eax
+    push dword [ebp+28]
+    call movSnake
+    cmp eax, 0
+    je final5
+    
+    mov eax, 1
+    final5:
+    pop ebp
+    pop esi
+    pop edx
+    pop ebx
+    pop ecx
+    popfd
+    
+ret 4
+; bool movDown(dword tablero)
+global movDown
+movDown:
+    pushfd
+    push ecx
+    push ebx
+    push edx
+    push esi
+    push ebp
+    mov ebp, esp
+    
+    push dword [ebp+28]
+    call maxUValue
+    
+    cmp eax, 0
+    je final6
+    
+    xor ebx, ebx
+    xor ecx, ecx
+    
+    mov bl, al
+    mov cl, ah
+    mov esi, [ebp+28]
+    mov eax, 80
+    mul ebx
+    add eax, ecx
+    add esi, eax
+    xor eax, eax
+    mov al, [esi]
+    
+    inc ebx
+    
+    push ecx
+    push ebx
+    push eax
+    push dword [ebp+28]
+    call movSnake
+    cmp eax, 0
+    je final6
+    
+    mov eax, 1
+    final6:
+    pop ebp
+    pop esi
+    pop edx
+    pop ebx
+    pop ecx
+    popfd
+    
+ret 4
 
+; bool movLeft(dword tablero)
+global movLeft
+movLeft:
+    pushfd
+    push ecx
+    push ebx
+    push edx
+    push esi
+    push ebp
+    mov ebp, esp
     
+    push dword [ebp+28]
+    call maxUValue
     
+    cmp eax, 0
+    je final7
     
+    xor ebx, ebx
+    xor ecx, ecx
     
+    mov bl, al
+    mov cl, ah
+    mov esi, [ebp+28]
+    mov eax, 80
+    mul ebx
+    add eax, ecx
+    add esi, eax
+    xor eax, eax
+    mov al, [esi]
     
+    dec ecx
     
+    push ecx
+    push ebx
+    push eax
+    push dword [ebp+28]
+    call movSnake
+    cmp eax, 0
+    je final7
     
+    mov eax, 1
+    final7:
+    pop ebp
+    pop esi
+    pop edx
+    pop ebx
+    pop ecx
+    popfd
+    
+ret 4
+
+; bool movRight(dword tablero)
+global movRight
+movRight:
+    pushfd
+    push ecx
+    push ebx
+    push edx
+    push esi
+    push ebp
+    mov ebp, esp
+    
+    push dword [ebp+28]
+    call maxUValue
+    
+    cmp eax, 0
+    je final8
+    
+    xor ebx, ebx
+    xor ecx, ecx
+    
+    mov bl, al
+    mov cl, ah
+    mov esi, [ebp+28]
+    mov eax, 80
+    mul ebx
+    add eax, ecx
+    add esi, eax
+    xor eax, eax
+    mov al, [esi]
+    
+    inc ecx
+    
+    push ecx
+    push ebx
+    push eax
+    push dword [ebp+28]
+    call movSnake
+    cmp eax, 0
+    je final8
+    
+    mov eax, 1
+    final8:
+    pop ebp
+    pop esi
+    pop edx
+    pop ebx
+    pop ecx
+    popfd
+    
+ret 4
+
+wrapMovRight:
+    push eax
+    push ebp
+    mov ebp, esp
+    
+    push dword tablero
+    call movRight
+    
+    pop ebp
+    pop eax
+ret
+
+wrapMovLeft:
+    push eax
+    push ebp
+    mov ebp, esp
+    
+    push dword tablero
+    call movLeft
+    
+    pop ebp
+    pop eax
+ret
+
+wrapMovDown:
+    push eax
+    push ebp
+    mov ebp, esp
+    
+    push dword tablero
+    call movDown
+    
+    pop ebp
+    pop eax
+ret
+
+wrapMovUp:
+    push eax
+    push ebp
+    mov ebp, esp
+    
+    push dword tablero
+    call movUp
+    
+    pop ebp
+    pop eax
+ret 
+
         
