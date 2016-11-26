@@ -13,6 +13,9 @@
     shl ax, 1
 %endmacro
 
+extern putHorizontalLine
+extern putVerticalLine
+extern putValue
 
 section .text
 
@@ -675,9 +678,10 @@ drawText:
     pop ebx
 ret 
 ; void drawTablero(dword tablero)
-; dibuja en pantalla a partir de la fila 1 (incluyendola) la matriz apuntada por tablero, teniendo en cuenta
-; lo siguiente, se asume que la matriz es de bytes, si el valor en la fila, columna es 0 no se pinta, si es
-; 255 se pinta un *, si es 254 se pinta un + y si es cualquier otro numero del intervalo se pinta $
+; dibuja en pantalla a partir de la fila 1 (incluyendola) la matriz apuntada por tablero(de 24x80), 
+; teniendo en cuenta lo siguiente, se asume que la matriz es de bytes, si el valor en la fila, columna 
+; es 0 no se pinta, si es 255 se pinta un *, si es 254 se pinta un + y si es cualquier otro numero 
+; del intervalo se pinta $
 global drawTablero
 drawTablero:
     push edx
@@ -758,9 +762,121 @@ drawTablero:
     popfd
     pop ecx
     pop edx
-ret 8
+ret 4; aca habia un 8 no se por que, deberia ser 4
+    
+global Antartida
+Antartida:
+    push ebp
+    mov ebp, esp
+    
+    push dword 0
+    push dword 0
+    push dword 80
+    push dword 255
+    push dword [ebp+8]
+    call putHorizontalLine
+    
+    push dword 0
+    push dword 23
+    push dword 80
+    push dword 255
+    push dword [ebp+8]
+    call putHorizontalLine
+    
+    push dword 0
+    push dword 22
+    push dword 22
+    push dword 255
+    push dword [ebp+8]
+    call putVerticalLine
+    
+    push dword 79
+    push dword 22
+    push dword 22
+    push dword 255
+    push dword [ebp+8]
+    call putVerticalLine
+    
+    push dword 3
+    push dword 2
+    push dword 6
+    push dword 255
+    push dword [ebp+8]
+    call putHorizontalLine
+    
+    push dword 10
+    push dword 2
+    push dword 7
+    push dword 255
+    push dword [ebp+8]
+    call putHorizontalLine
+    
+    push dword 3
+    push dword 4
+    push dword 6
+    push dword 255
+    push dword [ebp+8]
+    call putHorizontalLine
+    
+    push dword 8
+    push dword 8
+    push dword 4
+    push dword 255
+    push dword [ebp+8]
+    call putVerticalLine
+    
+    push dword 12
+    push dword 8
+    push dword 5
+    push dword 255
+    push dword [ebp+8]
+    call putVerticalLine
+    
+    push dword 16
+    push dword 9
+    push dword 7
+    push dword 255
+    push dword [ebp+8]
+    call putVerticalLine
+    
+    push dword 5
+    push dword 9
+    push dword 10
+    push dword 255
+    push dword [ebp+8]
+    call putHorizontalLine
+    
+    push dword 10
+    push dword 10
+    push dword 255
+    push dword [ebp+8]
+    call putValue
+    
+    push dword 24
+    push dword 3
+    push dword 5
+    push dword 255
+    push dword [ebp+8]
+    call putHorizontalLine
+    
+    push dword 28
+    push dword 2
+    push dword 2
+    push dword 255
+    push dword [ebp+8]
+    call putVerticalLine
+    
+    push dword 31
+    push dword 3
+    push dword 21
+    push dword 255
+    push dword [ebp+8]
+    call putHorizontalLine
     
     
+    
+    pop ebp
+ret
     
     
     

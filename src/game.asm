@@ -13,6 +13,8 @@ extern showMenu
 extern drawTablero
 extern drawText
 extern putChar
+extern Antartida
+extern showWelcome
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -40,37 +42,13 @@ game:
 
   ; Snakasm main loop
   game.loop:
-    .input:; ten presente guardar las flags en las subrutinas
+    .input:
       call get_input
 
-    ; Main loop.
-     
-    push dword 3
-    push dword 2
-    push dword 255
-    push dword tablero
-    call putValue
-     
-    push dword tablero
-    call drawTablero
-     
-    push dword 80
-    push dword 24
-    push dword 0
-    push dword 0
-    push dword tablero
-    call isValidPosition
+    ; Main loop
+
+       
     
-    cmp eax, 0
-    jne cosa
-    push dword 15
-    push dword 0
-    push dword 3
-    push dword 4
-    push dword 'd'
-    call putChar
-    cosa:
-   
     ; Here is where you will place your game logic.
     ; Develop procedures like paint_map and update_content,
     ; declare it extern and use here.
@@ -117,6 +95,7 @@ get_input:
 
 ; void putValue(dword tablero, dword value, dword fila, dword columna)
 ; pone el valor correspondiente en la fila, columna de la matriz apuntada por tablero
+global putValue
 putValue:
     push eax
     push esi
@@ -142,6 +121,7 @@ ret 16
 ; void putHorizontalLine(dword tablero, dword valor, dword cantidad, dword fila, dword columna)
 ; realiza una fila horizontal en la matriz apuntada por tablero, poniendo el valor el la fila, columna 
 ; correspondiente y la cantidad de veces indicadas hacia la derecha
+global putHorizontalLine
 putHorizontalLine:
     push ebx
     push ecx
@@ -170,6 +150,7 @@ ret 20
 ; void putVerticalLine(dword tablero, dword valor, dword cantidad, dword fila, dword columna)
 ; realiza una fila vartical en la matriz apuntada por tablero, poniendo el valor el la fila, columna 
 ; correspondiente y la cantidad de veces indicadas hacia arriba
+global putVerticalLine
 putVerticalLine:
     push ebx
     push ecx
@@ -209,12 +190,12 @@ inRange:
     cmp ebx, 0
     jl false2
     cmp ebx, [ebp+24]
-    jge false2
+    jae false2; aca pudiera dar algun error al trabajar con el complemento a dos, verificar
     mov ebx, [ebp+20]
     cmp ebx, 0
     jl false2
     cmp ebx, [ebp+28]
-    jge false2
+    jae false2
     
     true2:
         mov eax, 1
@@ -266,12 +247,159 @@ isValidPosition:
         pop edx
         pop esi
 ret 20
+; void putRandomValue(dword tablero, dword valor, dword maxFila, dword maxColumna)
+global putRandomApple; hay un error en esta funcion que hace que la pantalla se 
+; borre despues de un tiempo aborta la ejecucion sin decir nada, el error es un arithmetic exception, lo
+; probe con el sasm y es el problema pero no entiendo porque 
+putRandomApple:
+    push eax
+    push edx
+    pushfd
+    push esi
+    push ebx
+    push ecx
+    push ebp
+    mov ebp, esp
     
+    while3:
+        xor ebx, ebx
+        rdtsc
+        mov ebx, [ebp+40]
+        div ebx
+        mov ebx, edx
+        xor ecx, ecx
+        rdtsc
+        mov ecx, [ebp+44]
+        div ecx
+        mov ecx, edx
+        
+        push dword [ebp+44]
+        push dword [ebp+40]
+        push ecx
+        push ebx
+        push dword [ebp+32]
+        call isValidPosition
+        cmp eax, 0
+    je while3
     
+    push ecx
+    push ebx
+    push dword [ebp+36]
+    push dword [ebp+32]
+    call putValue
     
+    pop ebp
+    pop ecx
+    pop ebx
+    pop esi
+    popfd
+    pop edx
+    pop eax
+ret 16
+; void reduction(dword tablero)
+global reduction
+reduction:
+    push eax
+    pushfd
+    push esi
+    push ecx
+    push ebp
     
+    mov ebp, esp
     
+    mov ecx, 1920
     
+    Ciclo8:
+        mov eax, ecx
+        dec eax
+        mov esi, [ebp+24]
+        add esi, eax
+        cmp byte [esi], 0
+        je continueCiclo8
+        cmp byte [esi], 254
+        je continueCiclo8
+        cmp byte [esi], 255
+        je continueCiclo8
+        mov al, byte [esi]
+        dec al
+        mov byte [esi], al
+        continueCiclo8:
+    loop Ciclo8
+
+    pop ebp
+    pop ecx
+    pop esi
+    popfd
+    pop eax
+    
+ret 4
+
+; (fila(al), columna(ah)) maxUValue(dword tablero, dword maxFila, dword maxColumna)
+global maxUValue
+maxUValue:
+    push ecx
+    push ebx
+    push esi
+    push edx
+    pushfd
+    push dword 0
+    push dword 0
+    push dword 0
+    push ebp
+    mov ebp, esp
+    
+    mov eax, [ebp+48]
+    mov edx, [ebp+44]
+    mul edx
+    mov dword [ebp+4], eax
+    xor eax, eax
+    xor edx, edx
+    xor ecx, ecx
+    
+    mov esi, [ebp+40]
+    mov bl, 0
+    
+    while4:
+        mov esi, [ebp+40]
+        add esi, ecx
+        cmp byte [esi], 0
+        je continueWhile4
+        cmp byte [esi], 254
+        jae continueWhile4
+        cmp byte [esi], bl
+        jbe continueWhile4
+        mov bl,[esi]
+        mov dword [ebp+12], edx
+        mov dword [ebp+8], eax
+        continueWhile4:
+            inc ecx
+            cmp ecx, [ebp+4]
+            je endWhile4
+            inc edx
+            cmp edx, [ebp+48]
+            jne continue12
+            xor edx, edx
+            inc eax
+            cmp eax, [ebp+44]
+            je endWhile4
+            continue12:
+            jmp while4
+    endWhile4:
+        mov al, [ebp+8]
+        mov ah, [ebp+12]
+    pop ebp
+    pop ecx
+    pop ecx
+    pop ecx
+    popfd
+    pop edx
+    pop esi
+    pop ebx
+    pop ecx
+        
+ret 12
+    
+
     
     
     
