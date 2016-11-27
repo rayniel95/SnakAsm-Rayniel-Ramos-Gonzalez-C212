@@ -15,6 +15,7 @@ extern drawText
 extern putChar
 extern Antartida
 extern showWelcome
+extern drawNumber
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -47,9 +48,13 @@ game:
       call get_input
 
     ; Main loop
-    push dword tablero
-    call drawTablero
- 
+;    push dword tablero
+;    call drawTablero
+;     
+    push dword 79
+    push dword 0
+    push dword 256
+    call drawNumber
     
     ; Here is where you will place your game logic.
     ; Develop procedures like paint_map and update_content,
@@ -401,7 +406,7 @@ ret 4
     
 ; bool movSnake(dword tablero, dword valor, dword fila, dword columna)
 global movSnake
-movSnake:
+movSnake:; faltan los numeros del true false y final
     push esi
     push edx
     pushfd

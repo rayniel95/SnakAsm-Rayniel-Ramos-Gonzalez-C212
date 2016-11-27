@@ -907,8 +907,63 @@ Antartida:
     
     pop ebp
 ret 4
+
+; void drawNumber(dword numero, dword fila, dword columna)
+global drawNumber; revisar
+drawNumber:
+    pushfd
+    push eax
+    push edx
+    push ebx
+    push ecx
+    push dword 0
+    push ebp 
+    mov ebp, esp
     
+    mov ebx, [ebp+40]
+    mov eax, [ebp+32]
+    mov [ebp+4], eax
+    mov ecx, 10
+    cmp dword [ebp+32], 0
+    jne while5
+    push dword 15
+    push dword 0
+    push ebx
+    push dword [ebp+36]
+    push dword 48
+    call putChar
+    jmp endWhile5
+    while5:
+        xor edx, edx
+        div ecx
+        mov eax, [ebp+4]
+        sub eax, edx
+        add edx, 48
+        push dword 15
+        push dword 0
+        push dword ebx
+        push dword [ebp+36]
+        push edx
+        call putChar
+        
+        cmp eax, 0
+        je endWhile5
+        xor edx, edx
+        div ecx
+        mov [ebp+4], eax
+        dec ebx
+    jmp while5
+    endWhile5:
     
+    pop ebp
+    pop ecx
+    pop ecx
+    pop ebx
+    pop edx
+    pop eax
+    popfd
+
+ret 12
     
     
     
