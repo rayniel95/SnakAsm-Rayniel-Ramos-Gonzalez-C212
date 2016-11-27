@@ -1003,7 +1003,7 @@ updateMap:; revisar
     call delay
     
     cmp eax, 0
-    je final9
+    je final11
     
     mov esi, [ebp+32]
     cmp byte [esi], KEY.UP.UP
@@ -1019,9 +1019,9 @@ updateMap:; revisar
     push dword [ebp+24]
     call movUp
     cmp eax, 0
-    jne final9
+    jne final11
     call gameOver
-    jmp final9
+    jmp final11
     
     continue9:
     mov esi, [ebp+32]
@@ -1039,9 +1039,9 @@ updateMap:; revisar
     call movDown
     
     cmp eax, 0
-    jne final9
+    jne final11
     call gameOver
-    jmp final9
+    jmp final11
     
     continue10:
     mov esi, [ebp+32]
@@ -1059,9 +1059,9 @@ updateMap:; revisar
     call movLeft
     
     cmp eax, 0
-    jne final9
+    jne final11
     call gameOver
-    jmp final9
+    jmp final11
     
     continue11:
     mov esi, [ebp+32]
@@ -1073,17 +1073,17 @@ updateMap:; revisar
     verDireccionRight:
     mov esi, [ebp+36]
     cmp byte [esi], KEY.RIGHT.UP
-    jne final9
+    jne final11
     
     push dword [ebp+24]
     call movRight
     
     cmp eax, 0
-    jne final9
+    jne final11
     
     call gameOver
     
-    final9:
+    final11:
     
     pop ebp
     pop esi

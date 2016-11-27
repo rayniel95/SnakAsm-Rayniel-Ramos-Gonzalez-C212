@@ -5,6 +5,7 @@ section .data
     page db 1
     direccion dd 0
     timer dq 0
+    fruta dd 1
 
 section .text
 
@@ -52,7 +53,13 @@ game:
       call get_input
 
     ; Main loop
-
+    
+    push dword 80
+    push dword 24
+    push dword 254
+    push dword tablero
+    call putRandomApple2
+    
     push dword direccion
     push dword timer
     push dword tablero
@@ -263,7 +270,7 @@ isValidPosition:
         pop edx
         pop esi
 ret 20
-; void putRandomValue(dword tablero, dword valor, dword maxFila, dword maxColumna)
+; void putRandomApple(dword tablero, dword valor, dword maxFila, dword maxColumna)
 global putRandomApple
 putRandomApple:
     push eax
@@ -438,11 +445,13 @@ movSnake:
     ; quedara en false, al pasar por el ciclo en el gameloop el putRandomApple pregunta por la varible,
     ; si consigue poner una manzana la pone en true y si no la deja en false, el juego sigue sin manzana, hasta
     ; que se pueda poner una
-    push dword 80
-    push dword 24
-    push dword 254
-    push dword [ebp+20]
-    call putRandomApple
+;    push dword 80
+;    push dword 24
+;    push dword 254
+;    push dword [ebp+20]
+;    call putRandomApple
+    
+    mov dword [fruta], 0; esto es un parche
     
     jmp true3
     verCeldaLibre1:
@@ -731,3 +740,61 @@ gameOver:
     
     pop ebp
 ret
+
+; void putRandomApple2(dword tablero, dword valor, dword maxFila, dword maxColumna)
+global putRandomApple2
+putRandomApple2:
+    push eax
+    push edx
+    pushfd
+    push esi
+    push ebx
+    push ecx
+    push ebp
+    mov ebp, esp
+    
+    cmp dword [fruta], 0
+    jne final12
+    
+    xor ebx, ebx
+    rdtsc
+    xor edx, edx
+    mov ebx, [ebp+40]
+    div ebx
+    mov ebx, edx
+    xor ecx, ecx
+    rdtsc
+    xor edx, edx
+    mov ecx, [ebp+44]
+    div ecx
+    mov ecx, edx
+    
+    push dword [ebp+44]
+    push dword [ebp+40]
+    push ecx
+    push ebx
+    push dword [ebp+32]
+    call isValidPosition
+    cmp eax, 0
+    
+    je final12
+        
+    
+    push ecx
+    push ebx
+    push dword [ebp+36]
+    push dword [ebp+32]
+    call putValue
+    
+    mov dword [fruta], 1
+    
+    final12:
+    
+    pop ebp
+    pop ecx
+    pop ebx
+    pop esi
+    popfd
+    pop edx
+    pop eax
+ret 16
