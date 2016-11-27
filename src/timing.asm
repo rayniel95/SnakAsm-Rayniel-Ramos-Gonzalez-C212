@@ -243,4 +243,4 @@ delay:
     pop ebx
     mov esp, ebp
     pop ebp
-    ret
+    ret 8; aca no habia nada habia que limpiar la pila manualmente cuando esto retornara, que enredo

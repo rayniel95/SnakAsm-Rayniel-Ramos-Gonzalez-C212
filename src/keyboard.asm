@@ -8,6 +8,7 @@ section .data
     lastKey db 0
     cursor dd 17
 ; Previous scancode.
+global key
 key db 0
 
 section .text

@@ -3,6 +3,8 @@
 section .data
     tablero times 1920 db 0
     page db 1
+    direccion dd 0
+    timer dq 0
 
 section .text
 
@@ -16,6 +18,10 @@ extern putChar
 extern Antartida
 extern showWelcome
 extern drawNumber
+extern key
+extern updateMap
+extern delay
+extern updateMap2
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -48,13 +54,15 @@ game:
       call get_input
 
     ; Main loop
-;    push dword tablero
-;    call drawTablero
-;     
-    push dword 79
-    push dword 0
-    push dword 256
-    call drawNumber
+
+    push dword direccion
+    push dword timer
+    push dword tablero
+    call updateMap2
+   
+
+    push dword tablero
+    call drawTablero
     
     ; Here is where you will place your game logic.
     ; Develop procedures like paint_map and update_content,
@@ -406,7 +414,7 @@ ret 4
     
 ; bool movSnake(dword tablero, dword valor, dword fila, dword columna)
 global movSnake
-movSnake:; faltan los numeros del true false y final
+movSnake:
     push esi
     push edx
     pushfd
@@ -423,26 +431,26 @@ movSnake:; faltan los numeros del true false y final
     add esi, eax
     
     cmp byte [esi], 254
-    jne verCeldaLibre
+    jne verCeldaLibre1
     mov dl, [ebp+24]
     inc dl
     mov byte [esi], dl
-    jmp true
-    verCeldaLibre:
+    jmp true3
+    verCeldaLibre1:
     cmp byte [esi], 0
-    jne false
+    jne false4
     mov dl, [ebp+24]
     inc dl
     mov [esi], dl
     
     push dword [ebp+20]
     call reduction
-    true:
+    true3:
     mov eax, 1
-    jmp final
-    false:
+    jmp final9
+    false4:
     xor eax, eax
-    final:
+    final9:
     pop ebp
     popfd
     pop edx
@@ -659,6 +667,8 @@ wrapMovRight:
     push dword tablero
     call movRight
     
+    mov dword [direccion], KEY.RIGHT
+    
     pop ebp
     pop eax
 ret
@@ -670,6 +680,8 @@ wrapMovLeft:
     
     push dword tablero
     call movLeft
+    
+    mov dword [direccion], KEY.LEFT
     
     pop ebp
     pop eax
@@ -683,6 +695,8 @@ wrapMovDown:
     push dword tablero
     call movDown
     
+    mov dword [direccion], KEY.DOWN
+    
     pop ebp
     pop eax
 ret
@@ -695,8 +709,16 @@ wrapMovUp:
     push dword tablero
     call movUp
     
+    mov dword [direccion], KEY.UP
+    
     pop ebp
     pop eax
 ret 
 
-        
+global gameOver
+gameOver:
+    push ebp
+    mov ebp, esp
+    
+    pop ebp
+ret

@@ -1,4 +1,5 @@
 %include "video.mac"
+%include "keyboard.mac"
 
 ; Frame buffer location
 %define FBUFFER 0xB8000
@@ -16,6 +17,12 @@
 extern putHorizontalLine
 extern putVerticalLine
 extern putValue
+extern delay
+extern movUp
+extern movRight
+extern movLeft
+extern movDown
+extern gameOver
 
 section .text
 
@@ -904,12 +911,29 @@ Antartida:
     push dword [ebp+8]
     call putValue 
     
+    push dword 74
+    push dword 15
+    push dword 254
+    push dword [ebp+8]
+    call putValue 
+    
+    push dword 73
+    push dword 15
+    push dword 254
+    push dword [ebp+8]
+    call putValue 
+    
+    push dword 72
+    push dword 15
+    push dword 254
+    push dword [ebp+8]
+    call putValue 
     
     pop ebp
 ret 4
 
 ; void drawNumber(dword numero, dword fila, dword columna)
-global drawNumber; revisar
+global drawNumber
 drawNumber:
     pushfd
     push eax
@@ -964,8 +988,188 @@ drawNumber:
     popfd
 
 ret 12
+; void updateMap(dword tablero, dword (pointer) timer, dword (pointer) key, dword (pointer) direccion)
+global updateMap
+updateMap:; revisar
+    pushfd
+    push eax
+    push ebx
+    push esi
+    push ebp
+    mov ebp, esp
     
+    push dword 1000
+    push dword [ebp+28]
+    call delay
     
+    cmp eax, 0
+    je final9
     
+    mov esi, [ebp+32]
+    cmp byte [esi], KEY.UP.UP
+    jne verDireccionUp
+    mov bl, [esi]
+    mov eax, [ebp+36]
+    mov [eax], bl
     
+    verDireccionUp:
+    mov esi, [ebp+36]
+    cmp byte [esi], KEY.UP.UP
+    jne continue9
+    push dword [ebp+24]
+    call movUp
+    cmp eax, 0
+    jne final9
+    call gameOver
+    jmp final9
+    
+    continue9:
+    mov esi, [ebp+32]
+    cmp byte [esi], KEY.DOWN.UP
+    jne verDireccionDown
+    mov bl, [esi]
+    mov eax, [ebp+36]
+    mov [eax], bl
+    verDireccionDown:
+    mov esi, [ebp+36]
+    cmp byte [esi], KEY.DOWN.UP
+    jne continue10
+    
+    push dword [ebp+24]
+    call movDown
+    
+    cmp eax, 0
+    jne final9
+    call gameOver
+    jmp final9
+    
+    continue10:
+    mov esi, [ebp+32]
+    cmp byte [esi], KEY.LEFT.UP
+    jne verDireccionLeft
+    mov bl, [esi]
+    mov eax, [ebp+36]
+    mov [eax], bl
+    verDireccionLeft:
+    mov esi, [ebp+36]
+    cmp byte [esi], KEY.LEFT.UP
+    jne continue11
+    
+    push dword [ebp+24]
+    call movLeft
+    
+    cmp eax, 0
+    jne final9
+    call gameOver
+    jmp final9
+    
+    continue11:
+    mov esi, [ebp+32]
+    cmp byte [esi], KEY.RIGHT.UP
+    jne verDireccionRight
+    mov bl, [esi]
+    mov eax, [ebp+36]
+    mov [eax], bl
+    verDireccionRight:
+    mov esi, [ebp+36]
+    cmp byte [esi], KEY.RIGHT.UP
+    jne final9
+    
+    push dword [ebp+24]
+    call movRight
+    
+    cmp eax, 0
+    jne final9
+    
+    call gameOver
+    
+    final9:
+    
+    pop ebp
+    pop esi
+    pop ebx
+    pop eax
+    popfd
+    
+ret 16 
+; void updateMap2(dword tablero, dword timer, dword direccion)
+global updateMap2
+updateMap2:
+    pushfd
+    push eax
+    push ebx
+    push esi
+    push ebp
+    mov ebp, esp
+    
+    push dword 1000
+    push dword [ebp+28]
+    call delay
+    
+    cmp eax, 0
+    je final10
+    
+    mov esi, [ebp+32]
+    
+    cmp byte [esi], KEY.UP
+    jne continue12
+    
+    push dword [ebp+24]
+    call movUp
+    
+    cmp eax, 0
+    jne final10
+    
+    call gameOver
+    jmp final10
+    
+    continue12:
+    
+    cmp byte [esi], KEY.DOWN
+    jne continue13
+    
+    push dword [ebp+24]
+    call movDown
+    
+    cmp eax, 0
+    jne final10
+    
+    call gameOver
+    jmp final10
+    
+    continue13:
+    
+    cmp byte [esi], KEY.LEFT
+    jne continue14
+    
+    push dword [ebp+24]
+    call movLeft
+    
+    cmp eax, 0
+    jne final10
+    
+    call gameOver
+    jmp final10
+    
+    continue14:
+    
+    cmp byte [esi], KEY.RIGHT
+    jne final10
+    
+    push dword [ebp+24]
+    call movRight
+    
+    cmp eax, 0
+    jne final10
+    
+    call gameOver
+    
+    final10:
+    pop ebp
+    pop esi
+    pop ebx
+    pop eax
+    popfd
+
+ret 12
  
