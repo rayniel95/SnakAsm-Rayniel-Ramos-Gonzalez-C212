@@ -18,8 +18,6 @@ extern putChar
 extern Antartida
 extern showWelcome
 extern drawNumber
-extern key
-extern updateMap
 extern delay
 extern updateMap2
 
@@ -59,8 +57,7 @@ game:
     push dword timer
     push dword tablero
     call updateMap2
-   
-
+    
     push dword tablero
     call drawTablero
     
@@ -267,9 +264,7 @@ isValidPosition:
         pop esi
 ret 20
 ; void putRandomValue(dword tablero, dword valor, dword maxFila, dword maxColumna)
-global putRandomApple; hay un error en esta funcion que hace que la pantalla se 
-; borre despues de un tiempo aborta la ejecucion sin decir nada, el error es un arithmetic exception, lo
-; probe con el sasm y es el problema pero no entiendo porque 
+global putRandomApple
 putRandomApple:
     push eax
     push edx
@@ -283,11 +278,13 @@ putRandomApple:
     while3:
         xor ebx, ebx
         rdtsc
+        xor edx, edx
         mov ebx, [ebp+40]
         div ebx
         mov ebx, edx
         xor ecx, ecx
         rdtsc
+        xor edx, edx
         mov ecx, [ebp+44]
         div ecx
         mov ecx, edx
@@ -435,6 +432,18 @@ movSnake:
     mov dl, [ebp+24]
     inc dl
     mov byte [esi], dl
+    ; esto pudiera traer un pequeno error, si el tablero esta muy cargado quedara en un bucle que parara el 
+    ; programa, una solucion es no utilizar un ciclo en putRandomApple, sino hacerlo lineal, dentro del bucle del
+    ; gameloop, y utilizar una variable global 'boobleana' de forma tal que cuando se coma la manzana esta 
+    ; quedara en false, al pasar por el ciclo en el gameloop el putRandomApple pregunta por la varible,
+    ; si consigue poner una manzana la pone en true y si no la deja en false, el juego sigue sin manzana, hasta
+    ; que se pueda poner una
+    push dword 80
+    push dword 24
+    push dword 254
+    push dword [ebp+20]
+    call putRandomApple
+    
     jmp true3
     verCeldaLibre1:
     cmp byte [esi], 0
