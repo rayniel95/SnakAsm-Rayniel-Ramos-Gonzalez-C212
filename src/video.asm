@@ -990,7 +990,7 @@ drawNumber:
 ret 12
 ; void updateMap(dword tablero, dword (pointer) timer, dword (pointer) key, dword (pointer) direccion)
 global updateMap
-updateMap:; revisar
+updateMap:; revisar, borrar
     pushfd
     push eax
     push ebx
@@ -1092,7 +1092,7 @@ updateMap:; revisar
     popfd
     
 ret 16 
-; void updateMap2(dword tablero, dword timer, dword direccion)
+; void updateMap2(dword tablero, dword timer, dword direccion, dword ms)
 global updateMap2
 updateMap2:
     pushfd
@@ -1102,7 +1102,7 @@ updateMap2:
     push ebp
     mov ebp, esp
     
-    push dword 1000
+    push dword [ebp+36]
     push dword [ebp+28]
     call delay
     
@@ -1171,5 +1171,5 @@ updateMap2:
     pop eax
     popfd
 
-ret 12
+ret 16
  

@@ -5,7 +5,7 @@ section .data
     page db 1
     direccion dd 0
     timer dq 0
-    fruta dd 1
+    fruta dd 0
 
 section .text
 
@@ -21,6 +21,8 @@ extern showWelcome
 extern drawNumber
 extern delay
 extern updateMap2
+extern showMenuDiff
+extern showMenuMap
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -45,28 +47,44 @@ game:
 
   ; Calibrate the timing
   call calibrate
+  
+    
     push dword tablero
     call Antartida
+
+    push dword 255
+    push dword 100
+    push dword tablero
+    call putRandomValues
+    
+;    call soundOn
+;    
+;    push dword 100
+;    call putSound
+ 
+
   ; Snakasm main loop
   game.loop:
     .input:
       call get_input
 
     ; Main loop
-    
+    push dword fruta
     push dword 80
     push dword 24
     push dword 254
     push dword tablero
     call putRandomApple2
-    
+
+    push dword 1000
     push dword direccion
     push dword timer
     push dword tablero
     call updateMap2
-    
+;    
     push dword tablero
     call drawTablero
+   
     
     ; Here is where you will place your game logic.
     ; Develop procedures like paint_map and update_content,
@@ -99,11 +117,11 @@ get_input:
 ;    cmp dword [page], 1
 ;    jne page2
 ;    mov eax, 0
-;    bind KEY.DOWN, showMenu
-;    bind KEY.DOWN.UP, showMenu
-;    bind KEY.UP.UP, showMenu
-;    bind KEY.UP, showMenu
-;    bind KEY.ENTER, showMenu
+;    bind KEY.DOWN, showMenuMap
+;    bind KEY.DOWN.UP, showMenuMap
+;    bind KEY.UP.UP, showMenuMap
+;    bind KEY.UP, showMenuMap
+;    bind KEY.ENTER, showMenuMap
 ;    cmp eax, 0
 ;    je continuePage1
     ; aca se actualiza la pagina y se hacen otros llamados en dependencia del valor de retorno del menu
@@ -741,7 +759,7 @@ gameOver:
     pop ebp
 ret
 
-; void putRandomApple2(dword tablero, dword valor, dword maxFila, dword maxColumna)
+; void putRandomApple2(dword tablero, dword valor, dword maxFila, dword maxColumna, dword fruta)
 global putRandomApple2
 putRandomApple2:
     push eax
@@ -753,7 +771,8 @@ putRandomApple2:
     push ebp
     mov ebp, esp
     
-    cmp dword [fruta], 0
+    mov esi, [ebp+48]
+    cmp dword [esi], 0
     jne final12
     
     xor ebx, ebx
@@ -786,7 +805,7 @@ putRandomApple2:
     push dword [ebp+32]
     call putValue
     
-    mov dword [fruta], 1
+    mov dword [esi], 1
     
     final12:
     
@@ -797,4 +816,270 @@ putRandomApple2:
     popfd
     pop edx
     pop eax
-ret 16
+ret 20
+
+soundOn:
+    push eax
+    push ebp
+    mov ebp, esp
+    
+    in al, 0x61
+    or al, 3
+    out 0x61, al
+    
+    pop ebp
+    pop eax
+ret
+
+soundOff:
+    push eax
+    push ebp
+    mov ebp, esp
+    
+    in al, 0x61
+    and al, 252
+    out 0x61, al
+    
+    pop ebp
+    pop eax
+ret
+
+; void putSound(dword frecuencia)
+putSound:
+    push ebx
+    push eax
+    push edx
+    push ebp
+    mov ebp, esp
+    
+    mov al, 0xb6
+    out 0x43, al
+    mov eax, 1193380
+    mov ebx, [ebp+20]
+    xor edx, edx
+    div ebx
+    
+    out 0x42, al
+    mov al, ah
+    out 0x42, al
+    
+    pop ebp
+    pop edx
+    pop eax
+    pop ebx
+ret 4
+
+; bool isSpaceous(dword tablero, dword dila, dword colmna)
+; retorna 0 si la posicion fila, columna en la matriz es distinta de 0 o las ocho posiciones adyacentes lo son,
+; 1 en caso contrario
+global isSpaceous
+isSpaceous:
+    pushfd
+    push edx
+    push ebp
+    mov ebp, esp
+    
+    push dword 80
+    push dword 24
+    push dword [ebp+24]
+    push dword [ebp+20]
+    push dword [ebp+16]
+    call isValidPosition
+    
+    cmp eax, 0
+    je final
+    
+    ; abajo
+    mov edx, [ebp+20]
+    inc edx
+    
+    push dword 80
+    push dword 24
+    push dword [ebp+24]
+    push edx
+    push dword [ebp+16]
+    call isValidPosition
+    
+    cmp eax, 0
+    je final
+    
+    ; arriba
+    mov edx, [ebp+20]
+    dec edx
+    
+    push dword 80
+    push dword 24
+    push dword [ebp+24]
+    push edx
+    push dword [ebp+16]
+    call isValidPosition
+    
+    cmp eax, 0
+    je final
+    
+    ;izquierda
+    mov edx, [ebp+24]
+    dec edx
+    
+    push dword 80
+    push dword 24
+    push edx
+    push dword [ebp+20]
+    push dword [ebp+16]
+    call isValidPosition
+    
+    cmp eax, 0
+    je final
+    
+    ; derecha
+    mov edx, [ebp+24]
+    inc edx
+    
+    push dword 80
+    push dword 24
+    push edx
+    push dword [ebp+20]
+    push dword [ebp+16]
+    call isValidPosition
+    
+    cmp eax, 0
+    je final
+    
+    ; izquierda arriba
+    mov eax, [ebp+20]
+    mov edx, [ebp+24]
+    dec edx
+    dec eax
+    
+    push dword 80
+    push dword 24
+    push edx
+    push eax
+    push dword [ebp+16]
+    call isValidPosition
+    
+    cmp eax, 0 
+    je final
+    
+    ; izquierda abajo
+    mov eax, [ebp+20]
+    mov edx, [ebp+24]
+    dec edx
+    inc eax
+    
+    push dword 80
+    push dword 24
+    push edx
+    push eax
+    push dword [ebp+16]
+    call isValidPosition
+    
+    cmp eax, 0
+    je final
+    
+    ; derecha abajo
+    mov eax, [ebp+20]
+    mov edx, [ebp+24]
+    inc edx
+    inc eax
+    
+    push dword 80
+    push dword 24
+    push edx
+    push eax
+    push dword [ebp+16]
+    call isValidPosition
+    
+    cmp eax, 0
+    je final
+    
+    ; derecha arriba
+    mov eax, [ebp+20]
+    mov edx, [ebp+24]
+    inc edx
+    dec eax
+    
+    push dword 80
+    push dword 24
+    push edx
+    push eax
+    push dword [ebp+16]
+    call isValidPosition
+    
+    cmp eax, 0
+    je final
+    
+    mov eax, 1
+    
+    final:
+    pop ebp
+    pop edx
+    popfd
+  
+ret 12
+
+; void putRandomValues(dword tablero, dword numberOfValues, dword value)
+global putRandomValues
+putRandomValues:
+    push eax
+    push edx
+    push ecx
+    pushfd
+    push ebx
+    push dword 0
+    push dword 0
+    push ebp
+    mov ebp, esp
+    mov ecx, [ebp+40]
+    
+    Ciclo:
+        rdtsc
+        xor edx, edx
+        mov ebx, 80
+        div ebx
+        mov dword [ebp+8], edx
+        
+        rdtsc
+        xor edx, edx
+        mov ebx, 24
+        div ebx
+        mov dword [ebp+4], edx
+        
+        push dword [ebp+8]
+        push dword [ebp+4]
+        push dword [ebp+36]
+        call isSpaceous
+        
+        cmp eax, 0
+        je Ciclo
+        
+        push dword [ebp+8]
+        push dword [ebp+4]
+        push dword [ebp+44]
+        push dword [ebp+36]
+        call putValue
+        
+    loop Ciclo
+    
+    pop ebp
+    pop ebx
+    pop ebx
+    pop ebx
+    popfd
+    pop ecx
+    pop edx
+    pop eax
+
+ret 12
+
+
+
+
+
+
+
+
+
+
+
+
