@@ -49,19 +49,20 @@ game:
   call calibrate
   
     
-    push dword tablero
-    call Antartida
-
-    push dword 255
-    push dword 100
-    push dword tablero
-    call putRandomValues
+;    push dword tablero
+;    call Antartida
+;
+;    push dword 255
+;    push dword 100
+;    push dword tablero
+;    call putRandomValues
     
 ;    call soundOn
 ;    
-;    push dword 100
+;    push dword 200
 ;    call putSound
- 
+    
+    call sound3
 
   ; Snakasm main loop
   game.loop:
@@ -69,21 +70,22 @@ game:
       call get_input
 
     ; Main loop
-    push dword fruta
-    push dword 80
-    push dword 24
-    push dword 254
-    push dword tablero
-    call putRandomApple2
-
-    push dword 1000
-    push dword direccion
-    push dword timer
-    push dword tablero
-    call updateMap2
+    
+;    push dword fruta
+;    push dword 80
+;    push dword 24
+;    push dword 254
+;    push dword tablero
+;    call putRandomApple2
+;
+;    push dword 1000
+;    push dword direccion
+;    push dword timer
+;    push dword tablero
+;    call updateMap2
 ;    
-    push dword tablero
-    call drawTablero
+;    push dword tablero
+;    call drawTablero
    
     
     ; Here is where you will place your game logic.
@@ -887,7 +889,7 @@ isSpaceous:
     call isValidPosition
     
     cmp eax, 0
-    je final
+    je final13
     
     ; abajo
     mov edx, [ebp+20]
@@ -901,7 +903,7 @@ isSpaceous:
     call isValidPosition
     
     cmp eax, 0
-    je final
+    je final13
     
     ; arriba
     mov edx, [ebp+20]
@@ -915,7 +917,7 @@ isSpaceous:
     call isValidPosition
     
     cmp eax, 0
-    je final
+    je final13
     
     ;izquierda
     mov edx, [ebp+24]
@@ -929,7 +931,7 @@ isSpaceous:
     call isValidPosition
     
     cmp eax, 0
-    je final
+    je final13
     
     ; derecha
     mov edx, [ebp+24]
@@ -943,7 +945,7 @@ isSpaceous:
     call isValidPosition
     
     cmp eax, 0
-    je final
+    je final13
     
     ; izquierda arriba
     mov eax, [ebp+20]
@@ -959,7 +961,7 @@ isSpaceous:
     call isValidPosition
     
     cmp eax, 0 
-    je final
+    je final13
     
     ; izquierda abajo
     mov eax, [ebp+20]
@@ -975,7 +977,7 @@ isSpaceous:
     call isValidPosition
     
     cmp eax, 0
-    je final
+    je final13
     
     ; derecha abajo
     mov eax, [ebp+20]
@@ -991,7 +993,7 @@ isSpaceous:
     call isValidPosition
     
     cmp eax, 0
-    je final
+    je final13
     
     ; derecha arriba
     mov eax, [ebp+20]
@@ -1007,11 +1009,11 @@ isSpaceous:
     call isValidPosition
     
     cmp eax, 0
-    je final
+    je final13
     
     mov eax, 1
     
-    final:
+    final13:
     pop ebp
     pop edx
     popfd
@@ -1032,7 +1034,7 @@ putRandomValues:
     mov ebp, esp
     mov ecx, [ebp+40]
     
-    Ciclo:
+    Ciclo9:
         rdtsc
         xor edx, edx
         mov ebx, 80
@@ -1051,7 +1053,7 @@ putRandomValues:
         call isSpaceous
         
         cmp eax, 0
-        je Ciclo
+        je Ciclo9
         
         push dword [ebp+8]
         push dword [ebp+4]
@@ -1059,7 +1061,7 @@ putRandomValues:
         push dword [ebp+36]
         call putValue
         
-    loop Ciclo
+    loop Ciclo9
     
     pop ebp
     pop ebx
@@ -1072,10 +1074,176 @@ putRandomValues:
 
 ret 12
 
+; void sound1()
+sound1:
+    push eax
+    push dword 0
+    push dword 0
+    push ebp
+    mov ebp, esp
+    
+    call soundOn
+    
+    push dword 200
+    call putSound
+    
+    while6:
+        push dword 3000
+        mov eax, ebp
+        add eax, 4
+        push eax 
+        call delay
+        
+        cmp eax, 0
+    je while6
+    
+    push dword 100
+    call putSound
+    
+    while7:
+        push dword 3000
+        mov eax, ebp
+        add eax, 4
+        push eax 
+        call delay
+        
+        cmp eax, 0
+    je while7
+    
+    push dword 300
+    call putSound
 
+    while8:
+        push dword 3000
+        mov eax, ebp
+        add eax, 4
+        push eax 
+        call delay
+        
+        cmp eax, 0
+    je while8
+    
+    call soundOff    
+    
+    pop ebp
+    pop eax
+    pop eax
+    pop eax  
+ret
 
+; void sound2()
+sound2:
+    push eax
+    push dword 0
+    push dword 0
+    push ebp
+    mov ebp, esp
+    
+    call soundOn
+    
+    push dword 4000
+    call putSound
+    
+    while9:
+        push dword 3000
+        mov eax, ebp
+        add eax, 4
+        push eax 
+        call delay
+        
+        cmp eax, 0
+    je while9
+    
+    push dword 10
+    call putSound
+    
+    while10:
+        push dword 1000
+        mov eax, ebp
+        add eax, 4
+        push eax 
+        call delay
+        
+        cmp eax, 0
+    je while10
+    
+    push dword 600
+    call putSound
 
+    while11:
+        push dword 3000
+        mov eax, ebp
+        add eax, 4
+        push eax 
+        call delay
+        
+        cmp eax, 0
+    je while11
+    
+    call soundOff    
+    
+    pop ebp
+    pop eax
+    pop eax
+    pop eax  
+ret
 
+; void sound3()
+sound3:
+    push eax
+    push dword 0
+    push dword 0
+    push ebp
+    mov ebp, esp
+    
+    call soundOn
+    
+    push dword 2000
+    call putSound
+    
+    while12:
+        push dword 3000
+        mov eax, ebp
+        add eax, 4
+        push eax 
+        call delay
+        
+        cmp eax, 0
+    je while12
+    
+    push dword 400
+    call putSound
+    
+    while13:
+        push dword 3000
+        mov eax, ebp
+        add eax, 4
+        push eax 
+        call delay
+        
+        cmp eax, 0
+    je while13
+    
+    push dword 600
+    call putSound
+
+    while14:
+        push dword 3000
+        mov eax, ebp
+        add eax, 4
+        push eax 
+        call delay
+        
+        cmp eax, 0
+    je while14
+    
+    call soundOff    
+    
+    pop ebp
+    pop eax
+    pop eax
+    pop eax  
+ret
 
 
 
