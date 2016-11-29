@@ -2,10 +2,10 @@
 %include "keyboard.mac"
 section .data
     tablero times 1920 db 0
-    page db 1
+    page dd 1
     direccion dd 0
     timer dq 0
-    fruta dd 0
+    fruta dd 1
 
 section .text
 
@@ -16,13 +16,14 @@ extern showMenu
 extern drawTablero
 extern drawText
 extern putChar
-extern Antartida
+extern Aleatorio
 extern showWelcome
 extern drawNumber
 extern delay
 extern updateMap2
 extern showMenuDiff
 extern showMenuMap
+extern ArrecifeCoralino
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -47,23 +48,8 @@ game:
 
   ; Calibrate the timing
   call calibrate
-  
     
-;    push dword tablero
-;    call Antartida
-;
-;    push dword 255
-;    push dword 100
-;    push dword tablero
-;    call putRandomValues
-    
-;    call soundOn
-;    
-;    push dword 200
-;    call putSound
-    
-    call sound3
-
+    ;call sound1
   ; Snakasm main loop
   game.loop:
     .input:
@@ -71,19 +57,20 @@ game:
 
     ; Main loop
     
+ 
 ;    push dword fruta
 ;    push dword 80
 ;    push dword 24
 ;    push dword 254
 ;    push dword tablero
 ;    call putRandomApple2
-;
+
 ;    push dword 1000
 ;    push dword direccion
 ;    push dword timer
 ;    push dword tablero
 ;    call updateMap2
-;    
+    
 ;    push dword tablero
 ;    call drawTablero
    
@@ -119,20 +106,27 @@ get_input:
 ;    cmp dword [page], 1
 ;    jne page2
 ;    mov eax, 0
-;    bind KEY.DOWN, showMenuMap
-;    bind KEY.DOWN.UP, showMenuMap
-;    bind KEY.UP.UP, showMenuMap
-;    bind KEY.UP, showMenuMap
-;    bind KEY.ENTER, showMenuMap
+    bind KEY.DOWN, showMenuMap
+    bind KEY.DOWN.UP, showMenuMap
+    bind KEY.UP.UP, showMenuMap
+    bind KEY.UP, showMenuMap
+    bind KEY.ENTER, showMenuMap
 ;    cmp eax, 0
-;    je continuePage1
+;    je final
     ; aca se actualiza la pagina y se hacen otros llamados en dependencia del valor de retorno del menu
     continuePage1:
+    
+    
     page2:
-    bind KEY.UP, wrapMovUp
-    bind KEY.DOWN, wrapMovDown
-    bind KEY.LEFT, wrapMovLeft
-    bind KEY.RIGHT, wrapMovRight
+    
+;    bind KEY.UP, wrapMovUp
+;    bind KEY.DOWN, wrapMovDown
+;    bind KEY.LEFT, wrapMovLeft
+;    bind KEY.RIGHT, wrapMovRight
+    
+    
+    
+    final:
     add esp, 2 ; free the stack
     ret
 

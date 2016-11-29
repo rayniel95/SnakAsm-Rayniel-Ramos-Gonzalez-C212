@@ -10,5 +10,13 @@
 %define KEY.DOWN.UP 0xd0
 %define KEY.LEFT.UP 0xcb
 %define KEY.RIGHT.UP 0xcd
+%define KEY.A 0x1e
+%define KEY.S 0x1f
+%define KEY.D 0x20
+%define KEY.W 0x11
+%define KEY.A.UP 0x9e
+%define KEY.S.UP 0x9f
+%define KEY.D.UP 0xa0
+%define KEY.W.UP 0x91
 
 %endif ; KEYBOARD_MAC
