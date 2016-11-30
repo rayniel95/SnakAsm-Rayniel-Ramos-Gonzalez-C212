@@ -1121,7 +1121,7 @@ drawNumber:
     while5:
         xor edx, edx
         div ecx
-        mov eax, [ebp+4]
+        mov eax, dword [ebp+4]
         sub eax, edx
         add edx, 48
         push dword 15
@@ -1135,7 +1135,7 @@ drawNumber:
         je endWhile5
         xor edx, edx
         div ecx
-        mov [ebp+4], eax
+        mov dword [ebp+4], eax
         dec ebx
     jmp while5
     endWhile5:

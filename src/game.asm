@@ -11,6 +11,7 @@ section .data
     tiempo dd 0
     timerPuntuacion dq 0
     puntuacion dd 0
+ 
 
 section .text
 
@@ -32,6 +33,7 @@ extern ArrecifeCoralino
 extern Antartida
 extern Amazonas
 extern LaLuna
+extern drawHorizontalLine
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -69,31 +71,30 @@ game:
     ; Main loop
  
     
-;    cmp dword [page], 3
-;    jne noJuego    
-    mov ecx, 20
-    Ciclo:
-        cmp dword [fruta], 0; esta incrementando de dos en dos, verificar
-        jne continue
-        push dword puntuacion
-        call increasingPuntuation
-        continue:
-    loop Ciclo
-;    push dword fruta
-;    push dword 80
-;    push dword 24
-;    push dword 254
-;    push dword tablero
-;    call putRandomApple2
-;
-;    push dword [velocidad]
-;    push dword direccion
-;    push dword timer
-;    push dword tablero
-;    call updateMap2
-;    
-;    push dword tablero
-;    call drawTablero
+    cmp dword [page], 3
+    jne noJuego   
+   
+    push dword [tiempo]
+    push dword puntuacion
+    push dword timerPuntuacion
+    call decreasingPuntuation
+
+    push dword fruta
+    push dword 80
+    push dword 24
+    push dword 254
+    push dword tablero
+    call putRandomApple2
+
+    push dword [velocidad]
+    push dword direccion
+    push dword timer
+    push dword tablero
+    call updateMap2
+    
+    push dword tablero
+    call drawTablero
+
     noJuego:
     
     ; Here is where you will place your game logic.
@@ -133,7 +134,7 @@ get_input:
     bind KEY.UP, showMenuMap
     bind KEY.ENTER, showMenuMap
     cmp eax, 0
-    je final
+    je final14
     ; aca se actualiza la pagina y se hacen otros llamados en dependencia del valor de retorno del menu
     endingPage1:
         cmp eax, 1
@@ -188,66 +189,75 @@ get_input:
     bind KEY.UP, showMenuDiff
     bind KEY.SPACE, showMenuDiff
     cmp eax, 0
-    je final
+    je final14
     endingPage2:
         cmp eax, 1
         jne verLombriz
         mov eax, 1500
         mov [velocidad], eax
-        mov eax, 60000
+        mov eax, 10000
         mov [tiempo], eax
         mov eax, 3
         mov [page], eax
         mov eax, 1
+        call sound2
         verLombriz:
         cmp eax, 2
         jne verSerpiente
         mov eax, 1000
         mov [velocidad], eax 
-        mov eax, 30000
+        mov eax, 7000
         mov [tiempo], eax
         mov eax, 3
         mov [page], eax
         mov eax, 2
+        call sound2
         verSerpiente:
         cmp eax, 3
         jne verSerpienteConCohetes
         mov eax, 500
         mov [velocidad], eax
-        mov eax, 15000
+        mov eax, 5000
         mov [tiempo], eax
         mov eax, 3
         mov [page], eax
+        call sound2
         verSerpienteConCohetes:
         cmp eax, 4
         jne verFlashSnake
         mov eax, 100
         mov [velocidad], eax
-        mov eax, 10000
+        mov eax, 2000
         mov [tiempo], eax
         mov eax, 3
         mov [page], eax
+        call sound2
         verFlashSnake:
         cmp eax, 5
         jne endPage2
         mov eax, 50
         mov [velocidad], eax
-        mov eax, 10000
+        mov eax, 1000
         mov [tiempo], eax
         mov eax, 3
         mov [page], eax
+        call sound2
         endPage2:
     page3:
     cmp dword [page], 3
-    jne final
+    jne page4
     bind KEY.UP, wrapMovUp
     bind KEY.DOWN, wrapMovDown
     bind KEY.LEFT, wrapMovLeft
     bind KEY.RIGHT, wrapMovRight
+    page4:
+    cmp dword [page], 4
+    jne final14
+    bind KEY.ENTER, startAgain
+    bind KEY.DOWN, exit
     
     
-    
-    final:
+    final14:
     add esp, 2 ; free the stack
     ret
 
@@ -814,7 +824,7 @@ movRight:
     popfd
     
 ret 4
-
+; estos metodos tambien tienen que llamar a gameover
 wrapMovRight:
     push eax
     push ebp
@@ -875,6 +885,12 @@ global gameOver
 gameOver:
     push ebp
     mov ebp, esp
+    
+    mov dword [page], 4
+    call sound3
+    
+    
+    
     
     pop ebp
 ret
@@ -1263,7 +1279,7 @@ sound2:
     call putSound
     
     while9:
-        push dword 3000
+        push dword 1000
         mov eax, ebp
         add eax, 4
         push eax 
@@ -1289,7 +1305,7 @@ sound2:
     call putSound
 
     while11:
-        push dword 3000
+        push dword 1000
         mov eax, ebp
         add eax, 4
         push eax 
@@ -1320,7 +1336,7 @@ sound3:
     call putSound
     
     while12:
-        push dword 3000
+        push dword 1000
         mov eax, ebp
         add eax, 4
         push eax 
@@ -1333,7 +1349,7 @@ sound3:
     call putSound
     
     while13:
-        push dword 3000
+        push dword 1000
         mov eax, ebp
         add eax, 4
         push eax 
@@ -1346,7 +1362,7 @@ sound3:
     call putSound
 
     while14:
-        push dword 3000
+        push dword 1000
         mov eax, ebp
         add eax, 4
         push eax 
@@ -1399,10 +1415,9 @@ increasingPuntuation:
     mov ebp, esp
     
     mov esi, [ebp+16]
-    xor eax, eax
-    mov al, [esi]
-    inc al
-    mov [esi], al
+    mov eax, [esi]
+    inc eax
+    mov [esi], eax
     
     push dword 79
     push dword 0
@@ -1414,5 +1429,219 @@ increasingPuntuation:
     pop esi
 ret 4
 
+; void decreasingPuntuation(dword timer, dword puntuacion, dword ms)
+decreasingPuntuation:
+    push eax
+    push esi
+    push ebp
+    mov ebp, esp
+    
+    push dword [ebp+24]
+    push dword [ebp+16]
+    call delay
+    cmp eax, 0
+    je final15
+    
+    mov esi, [ebp+20]
+    cmp dword [esi], 0
+    je ponCero
+    mov eax, [esi]
+    dec eax
+    mov [esi], eax
+    
+    push dword 15
+    push dword 0
+    push dword 5
+    push dword 75
+    push dword 0
+    push dword ' '
+    call drawHorizontalLine
+ 
+    push dword 79
+    push dword 0
+    push eax
+    call drawNumber
+    jmp final15
+    
+    ponCero:
+    push dword 79
+    push dword 0
+    push dword 0
+    call drawNumber
 
+    final15:
+    
+    pop ebp
+    pop esi
+    pop eax    
+ret 12
 
+; void startAgain()
+startAgain:
+    push ebp
+    mov ebp, esp
+    
+    pop ebp
+ret
+
+; void exit()
+exit:
+    push ebp
+    mov ebp, esp
+    
+    
+    pop ebp
+ret
+
+; void addNumberToArray(dword (pointer) array, dword number, dword length)
+addNumberToArray:
+    push esi
+    push ecx
+    push ebp
+    mov ebp, esp
+    
+    mov esi, [ebp+16]
+    xor ecx, ecx
+    
+    while16:
+        add esi, ecx
+        cmp byte [esi], 0
+        jne continueWhile16
+        mov cl, [ebp+20]
+        mov [esi], cl
+        jmp endWhile16
+        continueWhile16:
+        inc ecx
+        mov esi, [ebp+16]
+        cmp ecx, [ebp+24]
+        je endWhile16
+    jmp while16
+    endWhile16:
+    
+    pop esi
+    pop ecx
+    pop ebp
+ret 12
+
+; pointer arrayMin(dword (pointer) array, dword length)
+arrayMin:
+    pushfd
+    push ebx
+    push edi
+    push esi
+    push ecx
+    push ebp
+    mov ebp, esp
+    
+    mov edi, [ebp+28]
+    mov esi, [ebp+28]
+    
+    xor ecx, ecx
+    
+    while17:
+        add esi, ecx
+        mov ebx, [esi]
+        cmp ebx, [edi]
+        jae continueWhile17
+        mov edi, esi
+        continueWhile17:
+        mov esi, [ebp+28]
+        add ecx, 4
+        cmp ecx, [ebp+32]
+        je endWhile17
+    jmp while17
+    endWhile17:
+    mov eax, edi
+    pop ebp
+    pop ecx
+    pop esi
+    pop edi
+    pop ebx
+    popfd
+ret 8
+
+; void scoreBoard(dword (pointer) puntuaciones, dword lenght)
+scoreBoard:
+    push eax
+    push ebx
+    push ecx
+    push esi
+    pushfd
+    push dword 0
+    push dword 0
+    push dword 0
+    push dword 0
+    push ebp
+    mov ebp, esp
+    
+    mov ecx, [ebp+48]
+    mov esi, [ebp+44]
+    
+    Ciclo10:
+        dec ecx
+        add esi, ecx
+        
+        mov eax, ebp
+        add eax, 4
+        
+        push dword 16
+        push eax
+        call arrayMin
+        
+        xor ebx, ebx
+        mov bl, [esi]
+        
+        cmp ebx, [eax]
+        jbe continueCiclo10
+        mov [eax], ebx
+        continueCiclo10:
+        mov esi, [ebp+44]
+        inc ecx
+    loop Ciclo10
+   
+    push dword 15
+    push dword 0
+    push dword 0
+    push dword 0
+    push dword ':'
+    push dword 'd'
+    push dword 'r'
+    push dword 'a'
+    push dword 'o'
+    push dword 'B'
+    push dword ' '
+    push dword 'e'
+    push dword 'r'
+    push dword 'o'
+    push dword 'c'
+    push dword 'S'
+    push dword 12
+    call drawText
+    add esp, 68
+    
+    mov esi, ebp
+    add esi, 4
+    mov ecx, 4
+    mov eax, 1
+    
+    Ciclo11:
+        push dword 5
+        push dword eax
+        push dword [esi]
+        call drawNumber
+        
+        inc eax
+        add esi, 4
+    loop Ciclo11
+    
+    pop ebp
+    pop eax
+    pop eax
+    pop eax
+    pop eax
+    popfd
+    pop esi
+    pop ecx
+    pop ebx
+    pop eax
+ret 8
