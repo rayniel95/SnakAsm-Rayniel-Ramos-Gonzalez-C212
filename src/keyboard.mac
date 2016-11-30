@@ -18,5 +18,6 @@
 %define KEY.S.UP 0x9f
 %define KEY.D.UP 0xa0
 %define KEY.W.UP 0x91
+%define KEY.SPACE 0x39
 
 %endif ; KEYBOARD_MAC

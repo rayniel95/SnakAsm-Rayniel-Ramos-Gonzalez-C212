@@ -6,6 +6,11 @@ section .data
     direccion dd 0
     timer dq 0
     fruta dd 1
+    puntuaciones times 5000 db 0
+    velocidad dd 0
+    tiempo dd 0
+    timerPuntuacion dq 0
+    puntuacion dd 0
 
 section .text
 
@@ -24,6 +29,9 @@ extern updateMap2
 extern showMenuDiff
 extern showMenuMap
 extern ArrecifeCoralino
+extern Antartida
+extern Amazonas
+extern LaLuna
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -48,32 +56,45 @@ game:
 
   ; Calibrate the timing
   call calibrate
-    
-    ;call sound1
+  
+  
+    call showWelcome
+    call sound1
+    FILL_SCREEN BG.BLACK
   ; Snakasm main loop
   game.loop:
     .input:
       call get_input
 
     ; Main loop
-    
  
+    
+;    cmp dword [page], 3
+;    jne noJuego    
+    mov ecx, 20
+    Ciclo:
+        cmp dword [fruta], 0; esta incrementando de dos en dos, verificar
+        jne continue
+        push dword puntuacion
+        call increasingPuntuation
+        continue:
+    loop Ciclo
 ;    push dword fruta
 ;    push dword 80
 ;    push dword 24
 ;    push dword 254
 ;    push dword tablero
 ;    call putRandomApple2
-
-;    push dword 1000
+;
+;    push dword [velocidad]
 ;    push dword direccion
 ;    push dword timer
 ;    push dword tablero
 ;    call updateMap2
-    
+;    
 ;    push dword tablero
 ;    call drawTablero
-   
+    noJuego:
     
     ; Here is where you will place your game logic.
     ; Develop procedures like paint_map and update_content,
@@ -103,26 +124,126 @@ get_input:
     ; The value of the input is on 'word [esp]'
 
     ; Your bindings here
-;    cmp dword [page], 1
-;    jne page2
-;    mov eax, 0
+    cmp dword [page], 1
+    jne page2
+    mov eax, 0
     bind KEY.DOWN, showMenuMap
     bind KEY.DOWN.UP, showMenuMap
     bind KEY.UP.UP, showMenuMap
     bind KEY.UP, showMenuMap
     bind KEY.ENTER, showMenuMap
-;    cmp eax, 0
-;    je final
+    cmp eax, 0
+    je final
     ; aca se actualiza la pagina y se hacen otros llamados en dependencia del valor de retorno del menu
-    continuePage1:
-    
-    
+    endingPage1:
+        cmp eax, 1
+        jne verArrecifeCoralino
+        push dword tablero
+        call Antartida
+        mov eax, 2
+        mov [page], eax
+        mov eax, 1
+        FILL_SCREEN BG.BLACK
+        verArrecifeCoralino:
+        cmp eax, 2
+        jne verAmazonas
+        push dword tablero
+        call ArrecifeCoralino
+        mov eax, 2
+        mov [page], eax 
+        FILL_SCREEN BG.BLACK
+        verAmazonas:
+        cmp eax, 3
+        jne verLaLuna
+        push dword tablero
+        call Amazonas
+        mov eax, 2
+        mov [page], eax
+        FILL_SCREEN BG.BLACK
+        verLaLuna:
+        cmp eax, 4
+        jne verAleatorio
+        push dword tablero
+        call LaLuna
+        mov eax, 2
+        mov [page], eax
+        FILL_SCREEN BG.BLACK
+        verAleatorio:
+        cmp eax, 5
+        jne endPage1
+        push dword 200; hay una alta posibilidad de que se demore un poco haciendo el tablero con 300
+        push dword tablero
+        call Aleatorio
+        mov eax, 2
+        mov [page], eax
+        FILL_SCREEN BG.BLACK
+        endPage1:
     page2:
-    
-;    bind KEY.UP, wrapMovUp
-;    bind KEY.DOWN, wrapMovDown
-;    bind KEY.LEFT, wrapMovLeft
-;    bind KEY.RIGHT, wrapMovRight
+    cmp dword [page], 2
+    jne page3
+    mov eax, 0
+    bind KEY.DOWN, showMenuDiff
+    bind KEY.DOWN.UP, showMenuDiff
+    bind KEY.UP.UP, showMenuDiff
+    bind KEY.UP, showMenuDiff
+    bind KEY.SPACE, showMenuDiff
+    cmp eax, 0
+    je final
+    endingPage2:
+        cmp eax, 1
+        jne verLombriz
+        mov eax, 1500
+        mov [velocidad], eax
+        mov eax, 60000
+        mov [tiempo], eax
+        mov eax, 3
+        mov [page], eax
+        mov eax, 1
+        verLombriz:
+        cmp eax, 2
+        jne verSerpiente
+        mov eax, 1000
+        mov [velocidad], eax 
+        mov eax, 30000
+        mov [tiempo], eax
+        mov eax, 3
+        mov [page], eax
+        mov eax, 2
+        verSerpiente:
+        cmp eax, 3
+        jne verSerpienteConCohetes
+        mov eax, 500
+        mov [velocidad], eax
+        mov eax, 15000
+        mov [tiempo], eax
+        mov eax, 3
+        mov [page], eax
+        verSerpienteConCohetes:
+        cmp eax, 4
+        jne verFlashSnake
+        mov eax, 100
+        mov [velocidad], eax
+        mov eax, 10000
+        mov [tiempo], eax
+        mov eax, 3
+        mov [page], eax
+        verFlashSnake:
+        cmp eax, 5
+        jne endPage2
+        mov eax, 50
+        mov [velocidad], eax
+        mov eax, 10000
+        mov [tiempo], eax
+        mov eax, 3
+        mov [page], eax
+        endPage2:
+    page3:
+    cmp dword [page], 3
+    jne final
+    bind KEY.UP, wrapMovUp
+    bind KEY.DOWN, wrapMovDown
+    bind KEY.LEFT, wrapMovLeft
+    bind KEY.RIGHT, wrapMovRight
     
     
     
@@ -466,6 +587,9 @@ movSnake:
 ;    call putRandomApple
     
     mov dword [fruta], 0; esto es un parche
+    
+    push dword puntuacion; esto es otro
+    call increasingPuntuation
     
     jmp true3
     verCeldaLibre1:
@@ -1239,9 +1363,56 @@ sound3:
     pop eax  
 ret
 
+; void sleep(dword ms)
+sleep:
+    push eax
+    push dword 0
+    push dword 0
+    push ebp
+    mov ebp, esp
+    
+    xor eax, eax
+    
+    while15:
+        mov eax, ebp
+        add eax, 4
+        
+        push dword [ebp+20]
+        push eax
+        call delay
+        
+        cmp eax, 0
+    je while15
+    
+    pop ebp
+    pop eax
+    pop eax
+    pop eax
+ret 4
 
-
-
+; void increasingPuntuation(dword puntuacion (pointer))
+global increasingPuntuation
+increasingPuntuation:
+    push esi
+    push eax
+    push ebp
+    mov ebp, esp
+    
+    mov esi, [ebp+16]
+    xor eax, eax
+    mov al, [esi]
+    inc al
+    mov [esi], al
+    
+    push dword 79
+    push dword 0
+    push eax
+    call drawNumber
+    
+    pop ebp
+    pop eax
+    pop esi
+ret 4
 
 
 

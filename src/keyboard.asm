@@ -43,6 +43,18 @@ menuMap:
     push dword 27
     push dword 15
     push dword ':'
+    push dword ')'
+    push dword 'r'
+    push dword 'e'
+    push dword 't'
+    push dword 'n'
+    push dword 'e'
+    push dword ' '
+    push dword 'e'
+    push dword 's'
+    push dword 'u'
+    push dword '('
+    push dword ' '
     push dword 'a'
     push dword 'p'
     push dword 'a'
@@ -58,7 +70,7 @@ menuMap:
     push dword 'l'
     push dword 'e'
     push dword 'S'
-    push dword 16
+    push dword 28
     call drawText
     mov esp, ebp
     
@@ -245,6 +257,20 @@ menuDiff:
     push dword 27
     push dword 15
     push dword ':'
+    push dword ')'
+    push dword 'o'
+    push dword 'i'
+    push dword 'c'
+    push dword 'a'
+    push dword 'p'
+    push dword 's'
+    push dword 'e'
+    push dword ' '
+    push dword 'e'
+    push dword 's'
+    push dword 'u'
+    push dword '('
+    push dword ' '
     push dword 'd'
     push dword 'a'
     push dword 't'
@@ -266,7 +292,7 @@ menuDiff:
     push dword 'l'
     push dword 'e'
     push dword 'S'
-    push dword 22
+    push dword 36
     call drawText
     mov esp, ebp
     
@@ -377,7 +403,7 @@ showMenuDiff:
     
     call menuDiff
         
-    cmp byte [key], KEY.ENTER
+    cmp byte [key], KEY.SPACE
     je true4
     cmp [key], byte KEY.DOWN.UP
     jne Continue15
