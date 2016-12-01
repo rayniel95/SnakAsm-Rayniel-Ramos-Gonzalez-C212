@@ -244,8 +244,8 @@ showWelcome:
     
     push dword 15
     push dword 0
-    push dword 7
     push dword 6
+    push dword 7
     push dword 7
     push dword '_'
     call drawHorizontalLine
@@ -288,7 +288,7 @@ showWelcome:
     
     push dword 15
     push dword 0
-    push dword 6
+    push dword 4
     push dword 9
     push dword 9
     push dword '_'
@@ -296,16 +296,16 @@ showWelcome:
     
     push dword 15
     push dword 0
-    push dword 5
-    push dword 9
+    push dword 4
+    push dword 8
     push dword 10
     push dword '_'
     call drawHorizontalLine
     
     push dword 15
     push dword 0
-    push dword 3
-    push dword 11
+    push dword 2
+    push dword 10
     push dword 12
     push dword '/'
     call drawDiagonalAscending
@@ -320,7 +320,14 @@ showWelcome:
     
     push dword 15
     push dword 0
-    push dword 5
+    push dword 13
+    push dword 10
+    push dword '\'
+    call putChar
+    
+    push dword 15
+    push dword 0
+    push dword 4
     push dword 6
     push dword 12
     push dword '_'
@@ -377,8 +384,16 @@ showWelcome:
 ; \\ 
     push dword 15
     push dword 0
-    push dword 8
+    push dword 7
     push dword 27
+    push dword 12
+    push dword '|'
+    call drawVerticalLine
+    
+    push dword 15
+    push dword 0
+    push dword 7
+    push dword 29
     push dword 12
     push dword '|'
     call drawVerticalLine
@@ -426,7 +441,7 @@ showWelcome:
     push dword 0
     push dword 6
     push dword 30
-    push dword 7
+    push dword 8
     push dword '_'
     call drawHorizontalLine
     
@@ -434,7 +449,7 @@ showWelcome:
     push dword 0
     push dword 6
     push dword 30
-    push dword 8
+    push dword 9
     push dword '*'
     call drawHorizontalLine
     
@@ -623,7 +638,7 @@ showWelcome:
     push dword 0
     push dword 10
     push dword 54
-    push dword 5
+    push dword 6
     push dword '_'
     call drawHorizontalLine
     
@@ -631,14 +646,14 @@ showWelcome:
     push dword 0
     push dword 10
     push dword 54
-    push dword 4
+    push dword 5
     push dword '_'
     call drawHorizontalLine
     
     push dword 15
     push dword 0
-    push dword 65
-    push dword 5
+    push dword 64
+    push dword 6
     push dword '|'
     call putChar
     

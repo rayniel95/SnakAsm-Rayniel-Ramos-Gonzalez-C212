@@ -58,11 +58,13 @@ game:
 
   ; Calibrate the timing
   call calibrate
-  
-  
+      
+    call instruction
+    
     call showWelcome
+    
     call sound1
-    FILL_SCREEN BG.BLACK
+
   ; Snakasm main loop
   game.loop:
     .input:
@@ -90,12 +92,30 @@ game:
     push dword direccion
     push dword timer
     push dword tablero
-    call updateMap2
     
+    call updateMap2
+    cmp dword [page], 4
+    jne continueJuego
+    
+    FILL_SCREEN BG.BLACK
+    jmp noJuego
+    
+    continueJuego:
     push dword tablero
     call drawTablero
-
     noJuego:
+    
+    cmp dword [page], 4
+    jne noGameOver
+    
+    push dword 5000
+    push dword puntuaciones
+    call scoreBoard
+    
+    call lastMessagge
+    
+    ; tanto para reiniciar
+    noGameOver:
     
     ; Here is where you will place your game logic.
     ; Develop procedures like paint_map and update_content,
@@ -172,7 +192,7 @@ get_input:
         verAleatorio:
         cmp eax, 5
         jne endPage1
-        push dword 200; hay una alta posibilidad de que se demore un poco haciendo el tablero con 300
+        push dword 200; hay una alta posibilidad de que se demore un poco haciendo el tablero
         push dword tablero
         call Aleatorio
         mov eax, 2
@@ -200,7 +220,7 @@ get_input:
         mov eax, 3
         mov [page], eax
         mov eax, 1
-        call sound2
+        call sound3
         verLombriz:
         cmp eax, 2
         jne verSerpiente
@@ -211,7 +231,7 @@ get_input:
         mov eax, 3
         mov [page], eax
         mov eax, 2
-        call sound2
+        call sound3
         verSerpiente:
         cmp eax, 3
         jne verSerpienteConCohetes
@@ -221,17 +241,17 @@ get_input:
         mov [tiempo], eax
         mov eax, 3
         mov [page], eax
-        call sound2
+        call sound3
         verSerpienteConCohetes:
         cmp eax, 4
         jne verFlashSnake
-        mov eax, 100
+        mov eax, 90
         mov [velocidad], eax
         mov eax, 2000
         mov [tiempo], eax
         mov eax, 3
         mov [page], eax
-        call sound2
+        call sound3
         verFlashSnake:
         cmp eax, 5
         jne endPage2
@@ -241,7 +261,7 @@ get_input:
         mov [tiempo], eax
         mov eax, 3
         mov [page], eax
-        call sound2
+        call sound3
         endPage2:
     page3:
     cmp dword [page], 3
@@ -254,8 +274,6 @@ get_input:
     cmp dword [page], 4
     jne final14
     bind KEY.ENTER, startAgain
-    bind KEY.DOWN, exit
-    
     
     final14:
     add esp, 2 ; free the stack
@@ -586,7 +604,7 @@ movSnake:
     mov byte [esi], dl
     ; esto pudiera traer un pequeno error, si el tablero esta muy cargado quedara en un bucle que parara el 
     ; programa, una solucion es no utilizar un ciclo en putRandomApple, sino hacerlo lineal, dentro del bucle del
-    ; gameloop, y utilizar una variable global 'boobleana' de forma tal que cuando se coma la manzana esta 
+    ; gameloop, y utilizar una variable global 'booleana' de forma tal que cuando se coma la manzana esta 
     ; quedara en false, al pasar por el ciclo en el gameloop el putRandomApple pregunta por la varible,
     ; si consigue poner una manzana la pone en true y si no la deja en false, el juego sigue sin manzana, hasta
     ; que se pueda poner una
@@ -835,6 +853,12 @@ wrapMovRight:
     
     mov dword [direccion], KEY.RIGHT
     
+    cmp eax, 0
+    jne continueWrapMovRight
+    call gameOver
+    FILL_SCREEN BG.BLACK
+    continueWrapMovRight:
+    
     pop ebp
     pop eax
 ret
@@ -848,6 +872,12 @@ wrapMovLeft:
     call movLeft
     
     mov dword [direccion], KEY.LEFT
+    
+    cmp eax, 0
+    jne continueWrapMovLeft
+    call gameOver
+    FILL_SCREEN BG.BLACK
+    continueWrapMovLeft:
     
     pop ebp
     pop eax
@@ -863,6 +893,12 @@ wrapMovDown:
     
     mov dword [direccion], KEY.DOWN
     
+    cmp eax, 0
+    jne continueWrapMovDown
+    call gameOver
+    FILL_SCREEN BG.BLACK
+    continueWrapMovDown:
+    
     pop ebp
     pop eax
 ret
@@ -877,6 +913,12 @@ wrapMovUp:
     
     mov dword [direccion], KEY.UP
     
+    cmp eax, 0
+    jne continueWrapMovUp
+    call gameOver
+    FILL_SCREEN BG.BLACK
+    continueWrapMovUp:
+    
     pop ebp
     pop eax
 ret 
@@ -887,11 +929,13 @@ gameOver:
     mov ebp, esp
     
     mov dword [page], 4
-    call sound3
+    call sound2
     
-    
-    
-    
+    push dword 5000
+    push dword [puntuacion]
+    push dword puntuaciones 
+    call addNumberToArray
+       
     pop ebp
 ret
 
@@ -1478,19 +1522,47 @@ ret 12
 
 ; void startAgain()
 startAgain:
+    push esi
+    push ecx
     push ebp
     mov ebp, esp
     
-    pop ebp
-ret
-
-; void exit()
-exit:
-    push ebp
-    mov ebp, esp
+    mov ecx, 1920
     
+    Ciclo12:
+        dec ecx
+        mov esi, tablero
+        add esi, ecx
+        mov byte [esi], 0
+        inc ecx
+    loop Ciclo12
+    
+    mov dword [page], 1
+    mov dword [direccion], 1
+    
+    mov dword [timer], 0
+    mov dword [timer+4], 0
+    
+    mov dword [fruta], 1
+    
+    mov dword [velocidad], 0
+    mov dword [tiempo], 0
+    
+    mov dword [timerPuntuacion], 0
+    mov dword [timerPuntuacion+4], 0
+    
+    mov dword [puntuacion], 0
+    
+    mov dword [page], 1
+    
+    FILL_SCREEN BG.BLACK
+    
+    call showWelcome
+    call sound1
     
     pop ebp
+    pop ecx
+    pop esi
 ret
 
 ; void addNumberToArray(dword (pointer) array, dword number, dword length)
@@ -1601,7 +1673,7 @@ scoreBoard:
    
     push dword 15
     push dword 0
-    push dword 0
+    push dword 30
     push dword 0
     push dword ':'
     push dword 'd'
@@ -1625,7 +1697,7 @@ scoreBoard:
     mov eax, 1
     
     Ciclo11:
-        push dword 5
+        push dword 42
         push dword eax
         push dword [esi]
         call drawNumber
@@ -1645,3 +1717,109 @@ scoreBoard:
     pop ebx
     pop eax
 ret 8
+
+; void lastMessagge()
+lastMessagge:
+    push ebp
+    mov ebp, esp
+    
+    push dword 15
+    push dword 0
+    push dword 27
+    push dword 15
+    push dword 'r'
+    push dword 'e'
+    push dword 'v'
+    push dword 'O'
+    push dword ' '
+    push dword 'e'
+    push dword 'm'
+    push dword 'a'
+    push dword 'G'
+    push dword 9
+    call drawText
+    add esp, 56
+    
+    push dword 15
+    push dword 0
+    push dword 20
+    push dword 20
+    push dword 'r'
+    push dword 'a'
+    push dword 'z'
+    push dword 'e'
+    push dword 'p'
+    push dword 'm'
+    push dword 'e'
+    push dword ' '
+    push dword 'a'
+    push dword ' '
+    push dword 'r'
+    push dword 'e'
+    push dword 'v'
+    push dword 'l'
+    push dword 'o'
+    push dword 'v'
+    push dword ' '
+    push dword 'a'
+    push dword 'r'
+    push dword 'a'
+    push dword 'p'
+    push dword ' '
+    push dword 'r'
+    push dword 'e'
+    push dword 't'
+    push dword 'n'
+    push dword 'E'
+    push dword 27
+    call drawText
+    add esp, 128
+    
+    pop ebp
+ret
+
+; void instruction()
+instruction:
+    push ebp
+    mov ebp, esp
+    
+    push dword 15
+    push dword 0
+    push dword 3
+    push dword 0
+    push dword 'o'
+    push dword 'j'
+    push dword 'a'
+    push dword 'b'
+    push dword 'a'
+    push dword ' '
+    push dword 'y'
+    push dword ' '
+    push dword 'a'
+    push dword 'b'
+    push dword 'i'
+    push dword 'r'
+    push dword 'r'
+    push dword 'a'
+    push dword ' '
+    push dword 's'
+    push dword 'a'
+    push dword 'l'
+    push dword 'c'
+    push dword 'e'
+    push dword 't'
+    push dword ' '
+    push dword 's'
+    push dword 'a'
+    push dword 'l'
+    push dword ' '
+    push dword 'e'
+    push dword 's'
+    push dword 'U'
+    push dword 29
+    call drawText
+    add esp, 136
+    
+    pop ebp
+ret
+
