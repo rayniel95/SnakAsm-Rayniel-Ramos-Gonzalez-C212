@@ -5,7 +5,8 @@ extern putHorizontalLine
 extern putVerticalLine
 extern putRandomValues
 
-; void Antartida(dword tablero)
+; void Antartida(dword (pointer) tablero)
+; crea un mapa en memoria, en la matriz apuntada por tablero
 global Antartida
 Antartida:
     push ebp
@@ -314,7 +315,7 @@ Antartida:
     pop ebp
 ret 4
 
-; void ArrecifeCoralino(dword tablero)
+; void ArrecifeCoralino(dword (pointer)tablero)
 global ArrecifeCoralino
 ArrecifeCoralino:
     push ebp
@@ -655,7 +656,7 @@ ArrecifeCoralino:
     pop ebp
 ret 4
 
-; void Amazonas(dword tablero)
+; void Amazonas(dword(pointer) tablero)
 global Amazonas
 Amazonas:
     push ebp
@@ -889,7 +890,7 @@ Amazonas:
     pop ebp
 ret 4
 
-; void LaLuna(dword tablero)
+; void LaLuna(dword(pointer) tablero)
 global LaLuna
 LaLuna:
     push ebp
@@ -1188,7 +1189,7 @@ LaLuna:
     pop ebp
 ret 4
 
-; void Aleatorio(dword tablero, dword numberOfWalls)
+; void Aleatorio(dword(pointer) tablero, dword numberOfWalls)
 global Aleatorio
 Aleatorio:
     push ebp

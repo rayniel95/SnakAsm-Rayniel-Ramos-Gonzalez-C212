@@ -1,5 +1,6 @@
 %include "video.mac"
 %include "keyboard.mac"
+%include "logica.mac"
 
 ; Frame buffer location
 %define FBUFFER 0xB8000
@@ -15,15 +16,7 @@
 %endmacro
 
 extern putHorizontalLine
-extern putVerticalLine
-extern putValue
 extern delay
-extern movUp
-extern movRight
-extern movLeft
-extern movDown
-extern gameOver
-extern putRandomValues
 
 section .text
 
@@ -125,7 +118,7 @@ drawHorizontalLine:
 ret 24; se retorna y limpia la pila
 ; drawHorizontalLine(dword caracter, dword fila, dword columna, dword caracteres, dword foreground, 
 ; dword background)
-; dibuja en pantalla una linea vertical hacia arriba a partir de la fila, columna seleccionadas, con 
+; dibuja en pantalla una linea vertical hacia arriba a partir de la fila, columna seleccionadas,  
 ; con longitud igual a la cantidad de caracteres
 global drawVerticalLine
 drawVerticalLine:
@@ -700,7 +693,7 @@ drawText:
     pop edx
     pop ebx
 ret 
-; void drawTablero(dword tablero)
+; void drawTablero(dword(pointer) tablero)
 ; dibuja en pantalla a partir de la fila 1 (incluyendola) la matriz apuntada por tablero(de 24x80), 
 ; teniendo en cuenta lo siguiente, se asume que la matriz es de bytes, si el valor en la fila, columna 
 ; es 0 no se pinta, si es 255 se pinta un *, si es 254 se pinta un + y si es cualquier otro numero 
@@ -727,10 +720,10 @@ drawTablero:
         mul edx
         add eax, ecx
         add esi, eax
-        cmp byte [esi], 255
+        cmp byte [esi], WALL
         jne Continue5
-        push dword 15
-        push dword 0
+        push dword WHITE
+        push dword BROWN
         push ecx
         
         mov edx, ebx
@@ -741,10 +734,10 @@ drawTablero:
         call putChar
         jmp continueWhile2
         Continue5:
-        cmp byte [esi], 254
+        cmp byte [esi], APPLE
         jne Continue6
-        push dword 15
-        push dword 0
+        push dword DARKRED
+        push dword RED
         push ecx
         
         mov edx, ebx
@@ -755,10 +748,10 @@ drawTablero:
         call putChar
         jmp continueWhile2
         Continue6:
-        cmp byte [esi], 0
+        cmp byte [esi], FREE
         jne continue7
-        push dword 15
-        push dword 0
+        push dword WHITE
+        push dword BLACK
         push ecx        
         
         mov edx, ebx
@@ -769,8 +762,8 @@ drawTablero:
         call putChar
         jmp continueWhile2
         continue7:
-        push dword 15
-        push dword 0
+        push dword RED
+        push dword VIOLET
         push ecx        
         
         mov edx, ebx
@@ -800,6 +793,10 @@ drawTablero:
 ret 4
 
 ; void drawNumber(dword numero, dword fila, dword columna)
+; dibujo un numero en patalla de la fila, columna hacia la izquierda, hacerlo hacia la derecha era mas complicado
+; divido entre 10 el numero, el resto va a ser el primer digito (de izquierda a derecha), le resto ese digito
+; al numero, lo que me quede siempre va ser multiplo de 10, pinto el digito, disminuyo la columna, divido entre
+; 10 la resta, y repito el proceso, eso me dara el segundo, etc digitos del numero, aparto el caso 0
 global drawNumber
 drawNumber:
     pushfd
@@ -815,23 +812,23 @@ drawNumber:
     mov eax, [ebp+32]
     mov [ebp+4], eax
     mov ecx, 10
-    cmp dword [ebp+32], 0
+    cmp dword [ebp+32], 0; verifico el 0, lo pinto y retorno
     jne while5
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push ebx
     push dword [ebp+36]
     push dword 48
     call putChar
     jmp endWhile5
     while5:
-        xor edx, edx
-        div ecx
-        mov eax, dword [ebp+4]
-        sub eax, edx
-        add edx, 48
-        push dword 15
-        push dword 0
+        xor edx, edx; limpio el edx que es donde estara mi resto para evitar errores
+        div ecx; divido el numero entre 10
+        mov eax, dword [ebp+4]; tengo una variable local que me almacena el numero, puesto que al dividir se 
+        sub eax, edx; borra el numero del eax, luego le resto el desultado de la division al numero, le agrego 48
+        add edx, 48; para tratar con ascii, lo pinto, disminuyo en uno la fila, la resta es multiplo de 10,
+        push dword WHITE; lo vuelvo a dividir, me quedara el segundo digito como el primero, vuelvo a repetir
+        push dword BLACK
         push dword ebx
         push dword [ebp+36]
         push edx
@@ -841,10 +838,10 @@ drawNumber:
         je endWhile5
         xor edx, edx
         div ecx
-        mov dword [ebp+4], eax
-        dec ebx
-    jmp while5
-    endWhile5:
+        mov dword [ebp+4], eax; despues de dividir por segunda vez entre 10, lo guardo en la varible local
+        dec ebx; puesto que despues voy a volver a dividir para obtener el primero digito y perderia el numero
+    jmp while5; del eax, lo necesito para restarle el primer digito, obtener un multiplo de 10 volver a dividir
+    endWhile5:; quedarme con el segundo digito que ahora seria mi primero y asi sucesivamente
     
     pop ebp
     pop ecx
@@ -855,187 +852,3 @@ drawNumber:
     popfd
 
 ret 12
-; void updateMap(dword tablero, dword (pointer) timer, dword (pointer) key, dword (pointer) direccion)
-global updateMap
-updateMap:; revisar, borrar
-    pushfd
-    push eax
-    push ebx
-    push esi
-    push ebp
-    mov ebp, esp
-    
-    push dword 1000
-    push dword [ebp+28]
-    call delay
-    
-    cmp eax, 0
-    je final11
-    
-    mov esi, [ebp+32]
-    cmp byte [esi], KEY.UP.UP
-    jne verDireccionUp
-    mov bl, [esi]
-    mov eax, [ebp+36]
-    mov [eax], bl
-    
-    verDireccionUp:
-    mov esi, [ebp+36]
-    cmp byte [esi], KEY.UP.UP
-    jne continue9
-    push dword [ebp+24]
-    call movUp
-    cmp eax, 0
-    jne final11
-    call gameOver
-    jmp final11
-    
-    continue9:
-    mov esi, [ebp+32]
-    cmp byte [esi], KEY.DOWN.UP
-    jne verDireccionDown
-    mov bl, [esi]
-    mov eax, [ebp+36]
-    mov [eax], bl
-    verDireccionDown:
-    mov esi, [ebp+36]
-    cmp byte [esi], KEY.DOWN.UP
-    jne continue10
-    
-    push dword [ebp+24]
-    call movDown
-    
-    cmp eax, 0
-    jne final11
-    call gameOver
-    jmp final11
-    
-    continue10:
-    mov esi, [ebp+32]
-    cmp byte [esi], KEY.LEFT.UP
-    jne verDireccionLeft
-    mov bl, [esi]
-    mov eax, [ebp+36]
-    mov [eax], bl
-    verDireccionLeft:
-    mov esi, [ebp+36]
-    cmp byte [esi], KEY.LEFT.UP
-    jne continue11
-    
-    push dword [ebp+24]
-    call movLeft
-    
-    cmp eax, 0
-    jne final11
-    call gameOver
-    jmp final11
-    
-    continue11:
-    mov esi, [ebp+32]
-    cmp byte [esi], KEY.RIGHT.UP
-    jne verDireccionRight
-    mov bl, [esi]
-    mov eax, [ebp+36]
-    mov [eax], bl
-    verDireccionRight:
-    mov esi, [ebp+36]
-    cmp byte [esi], KEY.RIGHT.UP
-    jne final11
-    
-    push dword [ebp+24]
-    call movRight
-    
-    cmp eax, 0
-    jne final11
-    
-    call gameOver
-    
-    final11:
-    
-    pop ebp
-    pop esi
-    pop ebx
-    pop eax
-    popfd
-    
-ret 16 
-; void updateMap2(dword tablero, dword timer, dword direccion, dword ms)
-global updateMap2
-updateMap2:
-    pushfd
-    push eax
-    push ebx
-    push esi
-    push ebp
-    mov ebp, esp
-    
-    push dword [ebp+36]
-    push dword [ebp+28]
-    call delay
-    
-    cmp eax, 0
-    je final10
-    
-    mov esi, [ebp+32]
-    
-    cmp byte [esi], KEY.UP
-    jne continue12
-    
-    push dword [ebp+24]
-    call movUp
-    
-    cmp eax, 0
-    jne final10
-    
-    call gameOver
-    jmp final10
-    
-    continue12:
-    
-    cmp byte [esi], KEY.DOWN
-    jne continue13
-    
-    push dword [ebp+24]
-    call movDown
-    
-    cmp eax, 0
-    jne final10
-    
-    call gameOver
-    jmp final10
-    
-    continue13:
-    
-    cmp byte [esi], KEY.LEFT
-    jne continue14
-    
-    push dword [ebp+24]
-    call movLeft
-    
-    cmp eax, 0
-    jne final10
-    
-    call gameOver
-    jmp final10
-    
-    continue14:
-    
-    cmp byte [esi], KEY.RIGHT
-    jne final10
-    
-    push dword [ebp+24]
-    call movRight
-    
-    cmp eax, 0
-    jne final10
-    
-    call gameOver
-    
-    final10:
-    pop ebp
-    pop esi
-    pop ebx
-    pop eax
-    popfd
-
-ret 16

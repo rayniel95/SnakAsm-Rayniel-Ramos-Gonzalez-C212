@@ -5,35 +5,31 @@ extern delay
 ; void addNumberToArray(dword (pointer) array, dword number, dword length)
 global addNumberToArray
 addNumberToArray:
-    push esi
-    push ecx
+    push ebx
+    push eax
     push ebp
     mov ebp, esp
     
-    mov esi, [ebp+16]
-    xor ecx, ecx
+    push dword [ebp+24]
+    push dword [ebp+16]
+    call arrayMin
     
-    while16:
-        add esi, ecx
-        cmp byte [esi], 0
-        jne continueWhile16
-        mov cl, [ebp+20]
-        mov [esi], cl
-        jmp endWhile16
-        continueWhile16:
-        inc ecx
-        mov esi, [ebp+16]
-        cmp ecx, [ebp+24]
-        je endWhile16
-    jmp while16
-    endWhile16:
+    mov ebx, [ebp+20]
     
-    pop esi
-    pop ecx
+    cmp [eax], ebx
+    jae final16
+    
+    mov [eax], ebx
+    
+    final16:
     pop ebp
+    pop eax
+    pop ebx
 ret 12
 
 ; pointer arrayMin(dword (pointer) array, dword length)
+; dado un puntero a array, y la longitud se encarga de darte un puntero en el eax al menor elemento del array,
+; asumo que el array es de dword
 global arrayMin
 arrayMin:
     pushfd
@@ -44,15 +40,15 @@ arrayMin:
     push ebp
     mov ebp, esp
     
-    mov edi, [ebp+28]
+    mov edi, [ebp+28]; se copia el puntero para esi, edi
     mov esi, [ebp+28]
     
     xor ecx, ecx
     
     while17:
         add esi, ecx
-        mov ebx, [esi]
-        cmp ebx, [edi]
+        mov ebx, [esi]; se aumenta el esi, y se compara con lo del edi, si lo del esi es mayor se pasa para el edi
+        cmp ebx, [edi]; asi hasta terminar el array, luego paso para el eax lo del edi
         jae continueWhile17
         mov edi, esi
         continueWhile17:
@@ -72,6 +68,7 @@ arrayMin:
 ret 8
 
 ; void sleep(dword ms)
+; para probar algunas cosas
 sleep:
     push eax
     push dword 0

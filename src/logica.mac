@@ -1,0 +1,9 @@
+%ifndef LOGICA_MAC
+%define LOGICA_MAC
+
+%define APPLE 254
+%define WALL 255
+%define FREE 0
+
+
+%endif

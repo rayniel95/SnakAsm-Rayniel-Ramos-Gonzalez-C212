@@ -1,15 +1,16 @@
+%include "video.mac"
 section .text
 
 extern drawText
-
+; como las funciones que pintan textos en pantalla se llevan demasiadas lineas las puse en un archivo aparte
 ; void lastMessagge()
 global lastMessagge
 lastMessagge:
     push ebp
     mov ebp, esp
     
-    push dword 15
-    push dword 0
+    push dword GREY
+    push dword DARKGREY
     push dword 27
     push dword 15
     push dword 'r'
@@ -25,8 +26,8 @@ lastMessagge:
     call drawText
     add esp, 56
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 20
     push dword 20
     push dword 'r'
@@ -69,8 +70,8 @@ instruction:
     push ebp
     mov ebp, esp
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 3
     push dword 0
     push dword 'o'
@@ -109,13 +110,15 @@ instruction:
     pop ebp
 ret
 
+; void menuDiff()
+; la funcion del texto del menu de dificultad
 global menuDiff  
 menuDiff:
     push ebp
     mov ebp, esp
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 27
     push dword 15
     push dword ':'
@@ -158,8 +161,8 @@ menuDiff:
     call drawText
     mov esp, ebp
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 17
     push dword 'o'
@@ -172,8 +175,8 @@ menuDiff:
     call drawText
     mov esp, ebp
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 18
     push dword 'z'
@@ -187,8 +190,8 @@ menuDiff:
     call drawText
     mov esp, ebp
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 19
     push dword 'e'
@@ -204,8 +207,8 @@ menuDiff:
     call drawText
     mov esp, ebp
         
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 20
     push dword 's'
@@ -233,8 +236,8 @@ menuDiff:
     call drawText
     mov esp, ebp
         
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 21
     push dword 'e'
@@ -254,13 +257,15 @@ menuDiff:
     pop ebp 
 ret 
 
+; void menuMap()
+; el texto del menu de mapas
 global menuMap   
 menuMap:
     push ebp
     mov ebp, esp
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 27
     push dword 15
     push dword ':'
@@ -295,8 +300,8 @@ menuMap:
     call drawText
     mov esp, ebp
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 17
     push dword 'a'
@@ -312,8 +317,8 @@ menuMap:
     call drawText
     mov esp, ebp
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 18
     push dword 'o'
@@ -337,8 +342,8 @@ menuMap:
     call drawText
     mov esp, ebp
     
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 19
     push dword 's'
@@ -353,8 +358,8 @@ menuMap:
     call drawText
     mov esp, ebp
         
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 20
     push dword 'a'
@@ -368,8 +373,8 @@ menuMap:
     call drawText
     mov esp, ebp
         
-    push dword 15
-    push dword 0
+    push dword WHITE
+    push dword BLACK
     push dword 30
     push dword 21
     push dword 'o'

@@ -24,4 +24,14 @@
 %define BG.GRAY    7 << 12
 %define BG.BRIGHT  8 << 12
 
+%define BROWN 6
+%define DARKGREY 8
+%define RED 12
+%define DARKRED 4
+%define WHITE 15
+%define BLACK 0
+%define VIOLET 5
+%define GREY 7
+%define DARKBLUE 3
+
 %endif ; VIDEO_MAC

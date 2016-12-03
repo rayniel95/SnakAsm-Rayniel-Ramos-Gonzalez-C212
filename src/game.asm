@@ -7,7 +7,7 @@ section .data
     timer dq 0
     global fruta
     fruta dd 1
-    puntuaciones times 5000 db 0
+    puntuaciones times 4 dd 0
     velocidad dd 0
     tiempo dd 0
     timerPuntuacion dq 0
@@ -41,6 +41,7 @@ extern putRandomApple2
 extern scoreBoard
 extern movUp, movRight, movDown, movLeft
 extern addNumberToArray
+
 
 ; Bind a key to a procedure
 %macro bind 2
@@ -79,40 +80,40 @@ game:
 
     ; Main loop
   
-    cmp dword [page], 3
-    jne noJuego   
-   
-    push dword [tiempo]
+    cmp dword [page], 3; en dependencia de la pagina se ejecuta o no algunas partes del ciclo, en la pagina 3 
+    jne noJuego; correspondiente al juego se le pasa el tiempo en el que se desea disminuir la puntuacion, un    
+    ; timer y el valor a puntuacion, una vez dentro del ciclo en esta parte la fucion se va a encargar de reducir
+    push dword [tiempo]; la puntuacion en el tiempo pasado dentro de la pagina 3 
     push dword puntuacion
     push dword timerPuntuacion
     call decreasingPuntuation
 
-    push dword fruta
+    push dword fruta; ponemos una fruta si no hay
     push dword 80
     push dword 24
     push dword 254
     push dword tablero
     call putRandomApple2
 
-    push dword [velocidad]
-    push dword direccion
+    push dword [velocidad]; movemos la serpiente si no se ha movido con las teclas para la ultima direccion 
+    push dword direccion; en la que se movio, con la velocidad que se nos pida y el timer propio para ella
     push dword timer
-    push dword tablero
-    
+    push dword tablero  
     call updateMap2
-    cmp dword [page], 4
+    
+    cmp dword [page], 4; verifico si updateMap2 llamo a gameOver de ser asi borro la pantalla y salgo de la pagina
     jne continueJuego
     
     FILL_SCREEN BG.BLACK
     jmp noJuego
     
-    continueJuego:
+    continueJuego:; si no se dio gameover se pinta el tablero en pantalla
     push dword tablero
     call drawTablero
     noJuego:
     
-    cmp dword [page], 4
-    jne noGameOver
+    cmp dword [page], 4; de otra manera si estamos en la pagina del game over se llama al scoreboard que informa
+    jne noGameOver; de las puntuaciones mas altas hasta el momento
     
     push dword 5000
     push dword puntuaciones
@@ -120,7 +121,6 @@ game:
     
     call lastMessagge
     
-    ; tanto para reiniciar
     noGameOver:
     
     ; Here is where you will place your game logic.
@@ -144,14 +144,22 @@ draw.green:
   add esp, 4
 
   ret
-
+; se encarga del binding de todas las teclas en dependencia de la pagina en la que se encuentre el juego, se 
+; entiende por pagina a 'un estado', o sea, el primer menu para seleccionar el mapa, el segundo para la dificultad
+; el tercero que es el juego como tal, y el ultimo que es el gameover donde se muestra el scoreboard y se pregunta
+; por volver a iniciar. pregunta por la pagina en la que nos encontramos y en dependecia pasa los bindings, ademas
+; de la seleccion del mapa hace los llamados a las funciones que lo construyen y en dependencia del nivel de 
+; dificultad escogido actualiza las variables globales que se utilizan en el juego como la velocidad de la 
+; serpiente y el tiempo en el que disminuye la puntuacion, ademas de actualizar las paginas en la parte de los 
+; menus, ya que el menu una vez dado enter deja en el eax el numero de la opcion seleccionada, entonces la funcion
+; llama a los contructores del mapa acorde a la opcion o inicializa las varibles.
 get_input:
     call scan
     push ax
     ; The value of the input is on 'word [esp]'
 
     ; Your bindings here
-    cmp dword [page], 1
+    cmp dword [page], 1; aca se pregunta si estamos en la primera pagina y se bindea al menu de los mapas
     jne page2
     mov eax, 0
     bind KEY.DOWN, showMenuMap
@@ -162,7 +170,7 @@ get_input:
     cmp eax, 0
     je final14
     ; aca se actualiza la pagina y se hacen otros llamados en dependencia del valor de retorno del menu
-    endingPage1:
+    endingPage1:; luego del retorno del menu de los mapas se crea el mapa que se selecciono
         cmp eax, 1
         jne verArrecifeCoralino
         push dword tablero
@@ -205,7 +213,7 @@ get_input:
         mov [page], eax
         FILL_SCREEN BG.BLACK
         endPage1:
-    page2:
+    page2:; aca se pregunta si estamos en la pagina dos, la dificultad y se bindea al menu de dificultad
     cmp dword [page], 2
     jne page3
     mov eax, 0
@@ -216,9 +224,9 @@ get_input:
     bind KEY.SPACE, showMenuDiff
     cmp eax, 0
     je final14
-    endingPage2:
-        cmp eax, 1
-        jne verLombriz
+    endingPage2:; en dependencia de la opcion seleccionada se inicializan las variables globales que se les pasan
+        cmp eax, 1; a las funciones que updatean el mapa si no se ha movido la serpiente y a la disminucion del
+        jne verLombriz; score
         mov eax, 1500
         mov [velocidad], eax
         mov eax, 10000
@@ -269,22 +277,25 @@ get_input:
         mov [page], eax
         call sound3
         endPage2:
-    page3:
+    page3:; aca se pregunta si estamos en la pagina tres y se bindea a los movimientos del snake
     cmp dword [page], 3
     jne page4
     bind KEY.UP, wrapMovUp
     bind KEY.DOWN, wrapMovDown
     bind KEY.LEFT, wrapMovLeft
     bind KEY.RIGHT, wrapMovRight
-    page4:
-    cmp dword [page], 4
+    page4:; aca se pregunta si estamos en la pagina 4 y se bindea a la funcion para volver a empezar, en donde se 
+    cmp dword [page], 4; reinicializan las varibles globales
     jne final14
     bind KEY.ENTER, startAgain
     
     final14:
     add esp, 2 ; free the stack
     ret
-
+; void wrapMovRight()
+; wrapea la funcion movRight pasandole los parametros globales, actualiza la direccion y verifica si se pudo mover
+; o no, en dependencia llama a gameOver, y borra el mapa de la pantalla, despues gameover se encarga de dar sonido
+; y de pasar el control a la pagina 4 en donde se gestiona si reiniciar el juego
 wrapMovRight:
     push eax
     push ebp
@@ -304,7 +315,10 @@ wrapMovRight:
     pop ebp
     pop eax
 ret
-
+; void wrapMovLeft()
+; wrapea la funcion movLeft pasandole los parametros globales, actualiza la direccion y verifica si se pudo mover
+; o no, en dependencia llama a gameOver, y borra el mapa de la pantalla, despues gameover se encarga de dar sonido
+; y de pasar el control a la pagina 4 en donde se gestiona si reiniciar el juego
 wrapMovLeft:
     push eax
     push ebp
@@ -324,7 +338,10 @@ wrapMovLeft:
     pop ebp
     pop eax
 ret
-
+; void wrapMovDown()
+; wrapea la funcion movDown pasandole los parametros globales, actualiza la direccion y verifica si se pudo mover
+; o no, en dependencia llama a gameOver, y borra el mapa de la pantalla, despues gameover se encarga de dar sonido
+; y de pasar el control a la pagina 4 en donde se gestiona si reiniciar el juego
 wrapMovDown:
     push eax
     push ebp
@@ -344,7 +361,10 @@ wrapMovDown:
     pop ebp
     pop eax
 ret
-
+; void wrapMovUp()
+; wrapea la funcion movUp pasandole los parametros globales, actualiza la direccion y verifica si se pudo mover
+; o no, en dependencia llama a gameOver, y borra el mapa de la pantalla, despues gameover se encarga de dar sonido
+; y de pasar el control a la pagina 4 en donde se gestiona si reiniciar el juego
 wrapMovUp:
     push eax
     push ebp
@@ -364,7 +384,13 @@ wrapMovUp:
     pop ebp
     pop eax
 ret 
-
+; void gameOver()
+; esta funcion se encarga de dar el gameover del juego, dispara un sonido, indicando que se ha perdido
+; pasa la pagina, cambiando en 'estado' del juego, y agrega al array de puntuaciones la puntuacion del juego, el
+; gameover se llama desde updateMap2 como de las funciones del movimiento, porque se sabe si es gameover si el
+; movimiento retorno false, o sea para la casilla que te vas a mover, no es libre o fruta, el hecho esta en que,
+; si el gameover fuera llamado por uno de los dos tipos de funciones, cabria de esperar un pequeno error a la hora
+; de updatear el mapa o a la hora de mover la serpiente, no se daria gameover
 global gameOver
 gameOver:
     push ebp
@@ -373,7 +399,7 @@ gameOver:
     mov dword [page], 4
     call sound2
     
-    push dword 5000
+    push dword 16
     push dword [puntuacion]
     push dword puntuaciones 
     call addNumberToArray
@@ -382,6 +408,11 @@ gameOver:
 ret
 
 ; void startAgain()
+; permite 'volver a iniciar juego', se reinicializan todas las variables, con excepcion del array de las 
+; puntuaciones, que se mantiene para tener las mayores puntuaciones entre juego y juego. Nuevamente, se limpia
+; la pantalla, se pone la bienvenida, se llama al sonido, se sigue dentro del gameloop por eso se hace estas tres
+; ultimas cosas, y basta reinicializar las variables y cambiar la pagina para que dentro del gameloop el juego
+; 'vuelva a empezar'.
 startAgain:
     push esi
     push ecx

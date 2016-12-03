@@ -3,6 +3,7 @@ section .text
 extern delay
 
 ; void soundOn()
+; enciende el speaker
 soundOn:
     push eax
     push ebp
@@ -17,6 +18,7 @@ soundOn:
 ret
 
 ; void soundOff()
+; apaga el speaker
 soundOff:
     push eax
     push ebp
@@ -31,6 +33,7 @@ soundOff:
 ret
 
 ; void putSound(dword frecuencia)
+; se le pone un sonido al speaker, dada una frecuencia
 putSound:
     push ebx
     push eax
@@ -56,6 +59,9 @@ putSound:
 ret 4
 
 ; void sound1()
+; esta funcion encapsula un sonido, basicamente, enciende el speaker, pasa una frecuencia, espera un tiempo,
+; pasa otra, espera un tiempo y pasa otra frecuencia, de esta forma se crea una especie de musica, con esto, si 
+; se tiene tiempo y se es muy detallista se podria hacer hasta la musica de mario
 global sound1
 sound1:
     push eax
@@ -114,6 +120,7 @@ sound1:
 ret
 
 ; void sound2()
+; similar a sound1 pero con distinta frecuencia y distintos tiempos de espera para cambiarla
 global sound2
 sound2:
     push eax
@@ -172,6 +179,7 @@ sound2:
 ret
 
 ; void sound3()
+; similar a sound1 pero con distintas frecuencias y distintos tiempos de espera para cambiarla
 global sound3
 sound3:
     push eax
