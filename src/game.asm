@@ -41,6 +41,8 @@ extern putRandomApple2
 extern scoreBoard
 extern movUp, movRight, movDown, movLeft
 extern addNumberToArray
+extern menuMap
+extern menuDiff
 
 
 ; Bind a key to a procedure
@@ -79,10 +81,32 @@ game:
       call get_input
 
     ; Main loop
+    
+    cmp dword [page], 1
+    jne noMenuMap
+    
+    call menuMap
+    
+    noMenuMap:
+    
+    cmp dword [page], 2
+    jne noMenuDiff
+    
+    call menuDiff
+    
+    noMenuDiff:
   
     cmp dword [page], 3; en dependencia de la pagina se ejecuta o no algunas partes del ciclo, en la pagina 3 
     jne noJuego; correspondiente al juego se le pasa el tiempo en el que se desea disminuir la puntuacion, un    
     ; timer y el valor a puntuacion, una vez dentro del ciclo en esta parte la fucion se va a encargar de reducir
+    
+    ; cmp dword [fruta], 1
+    ; jne continueDecreasingPuntuation
+    ; mov dword [timerPuntuacion], 0
+    ; mov dword [timerPuntuacion+4], 0
+    
+    ;continueDecreasingPuntuation
+    
     push dword [tiempo]; la puntuacion en el tiempo pasado dentro de la pagina 3 
     push dword puntuacion
     push dword timerPuntuacion
@@ -115,7 +139,7 @@ game:
     cmp dword [page], 4; de otra manera si estamos en la pagina del game over se llama al scoreboard que informa
     jne noGameOver; de las puntuaciones mas altas hasta el momento
     
-    push dword 5000
+    push dword 4
     push dword puntuaciones
     call scoreBoard
     
@@ -301,6 +325,10 @@ wrapMovRight:
     push ebp
     mov ebp, esp
     
+    cmp dword [direccion], KEY.LEFT
+    je finalWrapMoveRight
+    
+    
     push dword tablero
     call movRight
     
@@ -311,6 +339,11 @@ wrapMovRight:
     call gameOver
     FILL_SCREEN BG.BLACK
     continueWrapMovRight:
+    
+    mov dword [timer], 0
+    mov dword [timer+4], 0
+    
+    finalWrapMoveRight:
     
     pop ebp
     pop eax
@@ -324,6 +357,9 @@ wrapMovLeft:
     push ebp
     mov ebp, esp
     
+    cmp dword [direccion], KEY.RIGHT
+    je finalWrapMovLeft
+    
     push dword tablero
     call movLeft
     
@@ -334,6 +370,11 @@ wrapMovLeft:
     call gameOver
     FILL_SCREEN BG.BLACK
     continueWrapMovLeft:
+    
+    mov dword [timer], 0
+    mov dword [timer+4], 0
+    
+    finalWrapMovLeft:
     
     pop ebp
     pop eax
@@ -347,6 +388,9 @@ wrapMovDown:
     push ebp
     mov ebp, esp
     
+    cmp dword [direccion], KEY.UP
+    je finalWrapMovDown
+    
     push dword tablero
     call movDown
     
@@ -358,7 +402,12 @@ wrapMovDown:
     FILL_SCREEN BG.BLACK
     continueWrapMovDown:
     
-    pop ebp
+    mov dword [timer], 0; pongo el timer de actualizar el snake en 0 para que se empiece a contar justo cuando 
+    mov dword [timer+4], 0; se movio la serpiente por las teclas, de otra forma si vas a mover con las teclas 
+    ; tienes que saber cuando es que ella va a mover sola, y hace el juego mas complicado, demasiado desde mi
+    finalWrapMovDown:
+    
+    pop ebp; punto de vista
     pop eax
 ret
 ; void wrapMovUp()
@@ -370,6 +419,9 @@ wrapMovUp:
     push ebp
     mov ebp, esp
     
+    cmp dword [direccion], KEY.DOWN
+    je finalWrapMovUp
+    
     push dword tablero
     call movUp
     
@@ -380,6 +432,11 @@ wrapMovUp:
     call gameOver
     FILL_SCREEN BG.BLACK
     continueWrapMovUp:
+    
+    mov dword [timer], 0
+    mov dword [timer+4], 0
+    
+    finalWrapMovUp:
     
     pop ebp
     pop eax

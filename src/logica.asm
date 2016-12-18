@@ -981,7 +981,7 @@ scoreBoard:
     add esp, 68
     
     mov esi, [ebp+44]
-    mov ecx, 4
+    mov ecx, [ebp+48]; 4
     mov eax, 1
     
     Ciclo11:

@@ -76,7 +76,7 @@ sound1:
     call putSound
     
     while6:
-        push dword 3000
+        push dword 500
         mov eax, ebp
         add eax, 4
         push eax 
@@ -89,7 +89,7 @@ sound1:
     call putSound
     
     while7:
-        push dword 3000
+        push dword 500
         mov eax, ebp
         add eax, 4
         push eax 
@@ -102,7 +102,7 @@ sound1:
     call putSound
 
     while8:
-        push dword 3000
+        push dword 500
         mov eax, ebp
         add eax, 4
         push eax 
@@ -135,7 +135,7 @@ sound2:
     call putSound
     
     while9:
-        push dword 1000
+        push dword 100
         mov eax, ebp
         add eax, 4
         push eax 
@@ -148,7 +148,7 @@ sound2:
     call putSound
     
     while10:
-        push dword 1000
+        push dword 100
         mov eax, ebp
         add eax, 4
         push eax 
@@ -161,7 +161,7 @@ sound2:
     call putSound
 
     while11:
-        push dword 1000
+        push dword 100
         mov eax, ebp
         add eax, 4
         push eax 
@@ -194,7 +194,7 @@ sound3:
     call putSound
     
     while12:
-        push dword 1000
+        push dword 200
         mov eax, ebp
         add eax, 4
         push eax 
@@ -207,7 +207,7 @@ sound3:
     call putSound
     
     while13:
-        push dword 1000
+        push dword 200
         mov eax, ebp
         add eax, 4
         push eax 
@@ -220,7 +220,7 @@ sound3:
     call putSound
 
     while14:
-        push dword 1000
+        push dword 200
         mov eax, ebp
         add eax, 4
         push eax 
